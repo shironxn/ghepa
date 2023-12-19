@@ -4,6 +4,7 @@ import (
 	"errors"
 	"event-planning-app/config"
 	"event-planning-app/internal/core/domain"
+	"event-planning-app/internal/response"
 	"net/http"
 	"time"
 
@@ -19,10 +20,10 @@ type jwtClaims struct {
 type JWTManager struct {
 }
 
-func (j *JWTManager) GenerateToken(w http.ResponseWriter, user domain.User) (string, error) {
+func (j *JWTManager) GenerateToken(w http.ResponseWriter, user domain.User) (*response.UserDetails, error) {
 	conf := config.GetConfig()
 
-	expirationTime := jwt.NewNumericDate(time.Now().Add(3 * time.Hour))
+	expirationTime := jwt.NewNumericDate(time.Now().Add(1 * time.Hour))
 	claims := &jwtClaims{
 		Name:  user.Name,
 		Email: user.Email,
@@ -34,14 +35,23 @@ func (j *JWTManager) GenerateToken(w http.ResponseWriter, user domain.User) (str
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(conf.JWTSecret))
 
-	http.SetCookie(w, &http.Cookie{
+	expireTime := time.Now().Add(1 * time.Hour)
+	cookie := &http.Cookie{
 		Name:     "token",
 		Value:    tokenString,
 		Path:     "/",
 		HttpOnly: true,
-	})
+		Expires:  expireTime,
+	}
 
-	return tokenString, err
+	http.SetCookie(w, cookie)
+
+	details := response.UserDetails{
+		Token:   tokenString,
+		Expired: expireTime.String(),
+	}
+
+	return &details, err
 }
 
 func (j *JWTManager) ValidateToken(token string) error {
@@ -56,7 +66,7 @@ func (j *JWTManager) ValidateToken(token string) error {
 	}
 
 	if !tokens.Valid {
-		return errors.New("invalid token")
+		return errors.New("token is not valid")
 	}
 
 	claims, ok := tokens.Claims.(*jwtClaims)

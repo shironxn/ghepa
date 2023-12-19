@@ -1,21 +1,18 @@
 package util
 
 import (
+	"event-planning-app/internal/response"
+
 	"github.com/go-playground/validator/v10"
 )
 
-type ValidationError struct {
-	Field  string `json:"field"`
-	Errors string `json:"error"`
-}
-
-func Validate(validate *validator.Validate, data interface{}) []ValidationError {
+func Validate(validate *validator.Validate, data interface{}) []response.ValidationError {
 	err := validate.Struct(data)
 	if err != nil {
-		errors := make([]ValidationError, 0)
+		errors := make([]response.ValidationError, 0)
 
 		for _, validationErr := range err.(validator.ValidationErrors) {
-			errors = append(errors, ValidationError{
+			errors = append(errors, response.ValidationError{
 				Field:  validationErr.StructField(),
 				Errors: validationErr.Tag(),
 			})

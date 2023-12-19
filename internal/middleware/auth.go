@@ -20,14 +20,14 @@ func (j *AuthMiddleware) JWTVerify(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c, err := r.Cookie("token")
 		if err != nil || c == nil {
-			j.response.Error(w, http.StatusUnauthorized, "Unauthorized access", err.Error())
+			j.response.Error(w, http.StatusUnauthorized, "unauthorized access", err.Error())
 			return
 		}
 
 		tokenString := c.Value
 		errToken := j.jwt.ValidateToken(tokenString)
 		if errToken != nil {
-			j.response.Error(w, http.StatusUnauthorized, "Invalid Token", errToken.Error())
+			j.response.Error(w, http.StatusUnauthorized, "invalid Token", errToken.Error())
 			return
 		}
 

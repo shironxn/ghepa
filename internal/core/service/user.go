@@ -38,7 +38,7 @@ func (us *UserService) Create(req domain.User) (*domain.User, error) {
 	return data, nil
 }
 
-func (us *UserService) Login(req domain.UserLogin) (*domain.User, error) {
+func (us *UserService) Login(req domain.UserAuth) (*domain.User, error) {
 	data, err := us.repository.GetByEmail(req.Email)
 	if err != nil {
 		return nil, err
@@ -70,7 +70,19 @@ func (us *UserService) GetByID(id uint) (*domain.User, error) {
 }
 
 func (us *UserService) Update(id uint, req domain.User) (*domain.User, error) {
-	data, err := us.repository.Update(id, req)
+	hashedPassword, err := us.util.HashPassword(req.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Password = string(hashedPassword)
+
+	user, err := us.repository.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := us.repository.Update(*user, req)
 	if err != nil {
 		return nil, err
 	}

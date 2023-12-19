@@ -33,12 +33,14 @@ func (s *Route) Initialize() {
 		s.response.Success(w, http.StatusOK, "welcome to event planning api!", nil)
 	})
 
-	r.HandleFunc("/login", s.user.Login).Methods("POST")
-	r.HandleFunc("/register", s.user.Register).Methods("POST")
+	auth := r.PathPrefix("/api/v1/auth/").Subrouter()
+	auth.HandleFunc("/login", s.user.Login).Methods("POST")
+	auth.HandleFunc("/register", s.user.Register).Methods("POST")
 
 	api := r.PathPrefix("/api/v1/").Subrouter()
-
 	api.Use(s.authMiddleware.JWTVerify)
+
+	// user route
 	api.HandleFunc("/user", s.user.GetAll).Methods("GET")
 	api.HandleFunc("/user/{id}", s.user.GetByID).Methods("GET")
 	api.HandleFunc("/user/{id}", s.user.Update).Methods("PUT")
@@ -52,7 +54,6 @@ func (s *Route) Initialize() {
 	log.Info("Server running!", "PORT", s.config.Server.Port)
 
 	err := server.ListenAndServe()
-
 	if err != nil {
 		log.Error(err)
 	}

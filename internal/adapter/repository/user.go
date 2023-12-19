@@ -59,10 +59,8 @@ func (ur *UserRepository) GetByEmail(email string) (*domain.User, error) {
 	return &user, nil
 }
 
-func (ur *UserRepository) Update(id uint, req domain.User) (*domain.User, error) {
-	var user domain.User
-
-	err := ur.db.Model(&user).Where("id = ?", id).Updates(req).Error
+func (ur *UserRepository) Update(user domain.User, req domain.User) (*domain.User, error) {
+	err := ur.db.Model(&user).Updates(req).Error
 	if err != nil {
 		return nil, err
 	}
