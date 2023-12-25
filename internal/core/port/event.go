@@ -9,8 +9,8 @@ type EventRepository interface {
 	Create(req domain.Event) (*domain.Event, error)
 	GetAll() ([]domain.Event, error)
 	GetByID(id uint) (*domain.Event, error)
-	Update(id uint, req domain.Event) (*domain.Event, error)
-	Delete(id uint) error
+	Update(event *domain.Event, req domain.Event) (*domain.Event, error)
+	Delete(event *domain.Event) error
 }
 
 type EventService interface {

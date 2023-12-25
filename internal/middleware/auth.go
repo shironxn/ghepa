@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"event-planning-app/internal/util"
 	"net/http"
 )
@@ -25,11 +26,15 @@ func (j *AuthMiddleware) JWTVerify(next http.Handler) http.Handler {
 		}
 
 		tokenString := c.Value
-		errToken := j.jwt.ValidateToken(tokenString)
+		claims, errToken := j.jwt.ValidateToken(tokenString)
 		if errToken != nil {
 			j.response.Error(w, http.StatusUnauthorized, "invalid Token", errToken.Error())
 			return
 		}
+
+		ctx := context.WithValue(r.Context(), "claims", claims)
+
+		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
 	})

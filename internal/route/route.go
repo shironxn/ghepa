@@ -13,14 +13,16 @@ import (
 
 type Route struct {
 	user           port.UserHandler
+	event          port.EventHandler
 	response       util.Response
 	authMiddleware middleware.AuthMiddleware
 	config         *config.App
 }
 
-func NewRoute(user port.UserHandler, auth middleware.AuthMiddleware, config *config.App) *Route {
+func NewRoute(user port.UserHandler, event port.EventHandler, auth middleware.AuthMiddleware, config *config.App) *Route {
 	return &Route{
 		user:           user,
+		event:          event,
 		config:         config,
 		authMiddleware: auth,
 	}
@@ -45,6 +47,13 @@ func (s *Route) Initialize() {
 	api.HandleFunc("/user/{id}", s.user.GetByID).Methods("GET")
 	api.HandleFunc("/user/{id}", s.user.Update).Methods("PUT")
 	api.HandleFunc("/user/{id}", s.user.Delete).Methods("DELETE")
+
+	// event route
+	api.HandleFunc("/event", s.event.Create).Methods("POST")
+	api.HandleFunc("/event", s.event.GetAll).Methods("GET")
+	api.HandleFunc("/event/{id}", s.event.GetByID).Methods("GET")
+	api.HandleFunc("/event/{id}", s.event.Update).Methods("PUT")
+	api.HandleFunc("/event/{id}", s.event.Delete).Methods("DELETE")
 
 	server := http.Server{
 		Addr:    s.config.Server.Host + ":" + s.config.Server.Port,

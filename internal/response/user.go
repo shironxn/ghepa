@@ -3,9 +3,8 @@ package response
 import "time"
 
 type User struct {
-	ID    uint   `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
 }
 
 type UserDetails struct {
@@ -15,7 +14,7 @@ type UserDetails struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type UserResponse struct {
+type UserInfo struct {
 	User    User        `json:"user"`
 	Details UserDetails `json:"details"`
 }

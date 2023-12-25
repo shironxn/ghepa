@@ -11,20 +11,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type jwtClaims struct {
-	Name  string
-	Email string
-	jwt.RegisteredClaims
-}
-
 type JWTManager struct {
 }
 
 func (j *JWTManager) GenerateToken(w http.ResponseWriter, user domain.User) (*response.UserDetails, error) {
 	conf := config.GetConfig()
 
-	expirationTime := jwt.NewNumericDate(time.Now().Add(1 * time.Hour))
-	claims := &jwtClaims{
+	expirationTime := jwt.NewNumericDate(time.Now().Add(10 * time.Hour))
+	claims := &domain.Claims{
+		ID:    user.ID,
 		Name:  user.Name,
 		Email: user.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -32,10 +27,16 @@ func (j *JWTManager) GenerateToken(w http.ResponseWriter, user domain.User) (*re
 		},
 	}
 
+	if user.Email == conf.Admin.Email {
+		claims.Role = "admin"
+	} else {
+		claims.Role = "user"
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(conf.JWTSecret))
 
-	expireTime := time.Now().Add(1 * time.Hour)
+	expireTime := time.Now().Add(10 * time.Hour)
 	cookie := &http.Cookie{
 		Name:     "token",
 		Value:    tokenString,
@@ -54,29 +55,29 @@ func (j *JWTManager) GenerateToken(w http.ResponseWriter, user domain.User) (*re
 	return &details, err
 }
 
-func (j *JWTManager) ValidateToken(token string) error {
+func (j *JWTManager) ValidateToken(token string) (jwt.Claims, error) {
 	conf := config.GetConfig()
 
-	tokens, err := jwt.ParseWithClaims(token, &jwtClaims{}, func(t *jwt.Token) (interface{}, error) {
+	tokens, err := jwt.ParseWithClaims(token, &domain.Claims{}, func(t *jwt.Token) (interface{}, error) {
 		return []byte(conf.JWTSecret), nil
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !tokens.Valid {
-		return errors.New("token is not valid")
+		return nil, errors.New("invalid token")
 	}
 
-	claims, ok := tokens.Claims.(*jwtClaims)
+	claims, ok := tokens.Claims.(*domain.Claims)
 	if !ok {
-		return errors.New("invalid token claims")
+		return nil, errors.New("invalid token claims")
 	}
 
 	if claims.ExpiresAt.Unix() < time.Now().Local().Unix() {
-		return errors.New("token has expired")
+		return nil, errors.New("token has expired")
 	}
 
-	return nil
+	return claims, nil
 }

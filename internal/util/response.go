@@ -10,7 +10,7 @@ type Response struct {
 }
 
 func (r *Response) Success(w http.ResponseWriter, status int, message string, data interface{}) {
-	res := response.SuccessResponse{
+	res := response.Success{
 		Message: message,
 		Data:    data,
 	}
@@ -27,7 +27,7 @@ func (r *Response) Success(w http.ResponseWriter, status int, message string, da
 }
 
 func (r *Response) Error(w http.ResponseWriter, status int, message string, err interface{}) {
-	res := response.ErrorResponse{
+	res := response.Error{
 		Message: message,
 		Errors:  err,
 	}

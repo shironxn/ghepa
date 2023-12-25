@@ -29,50 +29,49 @@ func NewUserHandler(service port.UserService) port.UserHandler {
 	}
 }
 
-func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req domain.UserAuth
 
 	c, err := r.Cookie("token")
 	if err == nil && c != nil {
-		uh.response.Error(w, http.StatusUnauthorized, "you are already logged in", errors.New("user is already logged in").Error())
+		u.response.Error(w, http.StatusUnauthorized, "you are already logged in", errors.New("user is already logged in").Error())
 		return
 	}
 
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		uh.response.Error(w, http.StatusBadRequest, "failed to read request body", err)
+		u.response.Error(w, http.StatusBadRequest, "failed to read request body", err)
 		return
 	}
 
 	err = json.Unmarshal(reqBody, &req)
 	if err != nil {
-		uh.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err)
+		u.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err)
 		return
 	}
 
-	errValidate := util.Validate(uh.validate, req)
+	errValidate := util.Validate(u.validate, req)
 	if errValidate != nil {
-		uh.response.Error(w, http.StatusBadRequest, "validation failed", errValidate)
+		u.response.Error(w, http.StatusBadRequest, "validation failed", errValidate)
 		return
 	}
 
-	result, err := uh.service.Login(req)
+	result, err := u.service.Login(req)
 	if err != nil {
-		uh.response.Error(w, http.StatusUnauthorized, "cannot login user", err.Error())
+		u.response.Error(w, http.StatusUnauthorized, "cannot login user", err.Error())
 		return
 	}
 
-	token, err := uh.jwt.GenerateToken(w, *result)
+	token, err := u.jwt.GenerateToken(w, *result)
 	if err != nil {
-		uh.response.Error(w, http.StatusInternalServerError, "failed to generate token", err.Error())
+		u.response.Error(w, http.StatusInternalServerError, "failed to generate token", err.Error())
 		return
 	}
 
-	uh.response.Success(w, http.StatusOK, "login successful", response.UserResponse{
+	u.response.Success(w, http.StatusOK, "login successful", response.UserInfo{
 		User: response.User{
-			ID:    result.ID,
-			Name:  result.Name,
-			Email: result.Email,
+			ID:   result.ID,
+			Name: result.Name,
 		},
 		Details: response.UserDetails{
 			Token:     token.Token,
@@ -116,11 +115,10 @@ func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uh.response.Success(w, http.StatusOK, "successful register user", response.UserResponse{
+	uh.response.Success(w, http.StatusOK, "successful register user", response.UserInfo{
 		User: response.User{
-			ID:    result.ID,
-			Name:  result.Email,
-			Email: result.Email,
+			ID:   result.ID,
+			Name: result.Email,
 		},
 		Details: response.UserDetails{
 			CreatedAt: result.CreatedAt,
@@ -136,13 +134,12 @@ func (uh *UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var users []response.UserResponse
+	var userList []response.UserInfo
 	for _, user := range result {
-		users = append(users, response.UserResponse{
+		userList = append(userList, response.UserInfo{
 			User: response.User{
-				ID:    user.ID,
-				Name:  user.Name,
-				Email: user.Email,
+				ID:   user.ID,
+				Name: user.Name,
 			},
 			Details: response.UserDetails{
 				CreatedAt: user.CreatedAt,
@@ -151,7 +148,7 @@ func (uh *UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	uh.response.Success(w, http.StatusOK, "successfully retrieved user data", users)
+	uh.response.Success(w, http.StatusOK, "successfully retrieved user data", userList)
 }
 
 func (uh *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -170,11 +167,10 @@ func (uh *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uh.response.Success(w, http.StatusOK, "successfully retrieved user by id", response.UserResponse{
+	uh.response.Success(w, http.StatusOK, "successfully retrieved user by id", response.UserInfo{
 		User: response.User{
-			ID:    result.ID,
-			Name:  result.Email,
-			Email: result.Email,
+			ID:   result.ID,
+			Name: result.Email,
 		},
 		Details: response.UserDetails{
 			CreatedAt: result.CreatedAt,
@@ -185,6 +181,15 @@ func (uh *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var req domain.User
+
+	vars := mux.Vars(r)
+	params := vars["id"]
+
+	id, err := strconv.Atoi(params)
+	if err != nil {
+		uh.response.Error(w, http.StatusBadRequest, "invalid user id", err.Error())
+		return
+	}
 
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -204,26 +209,16 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r)
-	params := vars["id"]
-
-	id, err := strconv.Atoi(params)
-	if err != nil {
-		uh.response.Error(w, http.StatusBadRequest, "invalid user id", err.Error())
-		return
-	}
-
 	result, err := uh.service.Update(uint(id), req)
 	if err != nil {
 		uh.response.Error(w, http.StatusInternalServerError, "failed to update user", err.Error())
 		return
 	}
 
-	uh.response.Success(w, http.StatusOK, "successfully update user data", response.UserResponse{
+	uh.response.Success(w, http.StatusOK, "successfully update user data", response.UserInfo{
 		User: response.User{
-			ID:    uint(id),
-			Name:  result.Name,
-			Email: result.Email,
+			ID:   uint(id),
+			Name: result.Name,
 		},
 		Details: response.UserDetails{
 			CreatedAt: result.CreatedAt,

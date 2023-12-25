@@ -27,10 +27,14 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 	log.Info("User handler created")
 
+	eventRepository := repository.NewEventRepository(db)
+	eventService := service.NewEventService(eventRepository)
+	eventHandler := handler.NewEventHandler(eventService)
+
 	jwtManager := &util.JWTManager{}
 	authMiddleware := middleware.NewAuthMiddleware(*jwtManager)
 
-	route := route.NewRoute(userHandler, *authMiddleware, config.GetConfig())
+	route := route.NewRoute(userHandler, eventHandler, *authMiddleware, config.GetConfig())
 
 	route.Initialize()
 }

@@ -1,11 +1,11 @@
 package response
 
-type SuccessResponse struct {
+type Success struct {
 	Message string      `json:"message"`
 	Data    interface{} `json:"data,omitempty"`
 }
 
-type ErrorResponse struct {
+type Error struct {
 	Message string      `json:"message"`
 	Errors  interface{} `json:"errors"`
 }

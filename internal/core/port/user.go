@@ -10,8 +10,8 @@ type UserRepository interface {
 	GetAll() ([]domain.User, error)
 	GetByID(id uint) (*domain.User, error)
 	GetByEmail(email string) (*domain.User, error)
-	Update(user domain.User, req domain.User) (*domain.User, error)
-	Delete(id uint) error
+	Update(user *domain.User, req domain.User) (*domain.User, error)
+	Delete(user *domain.User) error
 }
 
 type UserService interface {

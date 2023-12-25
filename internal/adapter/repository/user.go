@@ -17,64 +17,35 @@ func NewUserRepository(db *gorm.DB) port.UserRepository {
 	}
 }
 
-func (ur *UserRepository) Create(req domain.User) (*domain.User, error) {
-	err := ur.db.Create(&req).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return &req, nil
+func (u *UserRepository) Create(req domain.User) (*domain.User, error) {
+	err := u.db.Create(&req).Error
+	return &req, err
 }
 
-func (ur *UserRepository) GetAll() ([]domain.User, error) {
+func (u *UserRepository) GetAll() ([]domain.User, error) {
 	var users []domain.User
-
-	err := ur.db.Find(&users).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return users, nil
+	err := u.db.Find(&users).Error
+	return users, err
 }
 
-func (ur *UserRepository) GetByID(id uint) (*domain.User, error) {
+func (u *UserRepository) GetByID(id uint) (*domain.User, error) {
 	var user domain.User
-
-	err := ur.db.First(&user, "id = ?", id).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
+	err := u.db.First(&user, id).Error
+	return &user, err
 }
 
-func (ur *UserRepository) GetByEmail(email string) (*domain.User, error) {
+func (u *UserRepository) GetByEmail(email string) (*domain.User, error) {
 	var user domain.User
-
-	err := ur.db.Where("email = ?", email).First(&user).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
+	err := u.db.Where("email = ?", email).First(&user).Error
+	return &user, err
 }
 
-func (ur *UserRepository) Update(user domain.User, req domain.User) (*domain.User, error) {
-	err := ur.db.Model(&user).Updates(req).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
+func (u *UserRepository) Update(user *domain.User, req domain.User) (*domain.User, error) {
+	err := u.db.Model(user).Updates(req).Error
+	return user, err
 }
 
-func (ur *UserRepository) Delete(id uint) error {
-	var user domain.User
-
-	err := ur.db.Where("id = ?", id).Delete(&user).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (u *UserRepository) Delete(user *domain.User) error {
+	err := u.db.Delete(&user).Error
+	return err
 }
