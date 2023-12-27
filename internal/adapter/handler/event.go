@@ -136,6 +136,56 @@ func (e *EventHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	e.response.Success(w, http.StatusOK, "successfully retrived event", eventList)
 }
 
+func (e *EventHandler) GetAllByUser(w http.ResponseWriter, r *http.Request) {
+	claims := r.Context().Value("claims").(*domain.Claims)
+
+	result, err := e.service.GetAllByUser(claims.ID)
+	if err != nil {
+		e.response.Error(w, http.StatusInternalServerError, "failed to retrieve event", err.Error())
+		return
+	}
+
+	var eventList []response.EventInfo
+	for _, event := range result {
+		var commentList []response.CommentList
+		for _, comment := range event.Comments {
+			commentList = append(commentList, response.CommentList{
+				Name:    comment.User.Name,
+				Comment: comment.Comment,
+			})
+		}
+
+		var participantList []response.ParticipantList
+		for _, participant := range event.Participant {
+			participantList = append(participantList, response.ParticipantList{
+				Name:  participant.User.Name,
+				Email: participant.User.Email,
+			})
+		}
+
+		eventList = append(eventList, response.EventInfo{
+			Event: response.Event{
+				ID:          event.User.ID,
+				Title:       event.Title,
+				Description: event.Description,
+				Owner: response.User{
+					ID:   event.User.ID,
+					Name: event.User.Name,
+				},
+				Comments:    commentList,
+				Participant: participantList,
+			},
+			EventDetails: response.EventDetails{
+				CreatedAt: event.CreatedAt,
+				UpdatedAt: event.UpdatedAt,
+				EndDate:   event.EndDate,
+			},
+		})
+	}
+
+	e.response.Success(w, http.StatusOK, "successfully retrivied user", eventList)
+}
+
 func (e *EventHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	params := vars["id"]
@@ -212,6 +262,12 @@ func (e *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	claims := r.Context().Value("claims").(*domain.Claims)
+	req.User = response.User{
+		ID:   claims.ID,
+		Name: claims.Name,
+	}
+
 	errValidate := util.Validate(e.validate, req)
 	if errValidate != nil {
 		e.response.Error(w, http.StatusBadRequest, "validation failed", errValidate)
@@ -221,6 +277,7 @@ func (e *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
 	result, err := e.service.Update(uint(id), req)
 	if err != nil {
 		e.response.Error(w, http.StatusBadRequest, "failed update event", err.Error())
+		return
 	}
 
 	var commentList []response.CommentList
@@ -239,7 +296,7 @@ func (e *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	e.response.Success(w, http.StatusOK, "successfully retrived event id", response.EventInfo{
+	e.response.Success(w, http.StatusOK, "successfully update event", response.EventInfo{
 		Event: response.Event{
 			ID:          result.ID,
 			Title:       result.Title,
@@ -266,11 +323,20 @@ func (e *EventHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(params)
 	if err != nil {
 		e.response.Error(w, http.StatusBadGateway, "invalid event id", err.Error())
+		return
+	}
+
+	var req domain.Event
+	claims := r.Context().Value("claims").(*domain.Claims)
+	req.User = response.User{
+		ID:   claims.ID,
+		Name: claims.Name,
 	}
 
 	err = e.service.Delete(uint(id))
 	if err != nil {
 		e.response.Error(w, http.StatusBadGateway, "failed deleted event", err.Error())
+		return
 	}
 
 	e.response.Success(w, http.StatusOK, "successfully deleted event", nil)

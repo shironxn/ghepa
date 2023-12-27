@@ -33,6 +33,15 @@ func (e *EventService) GetAll() ([]domain.Event, error) {
 	return data, nil
 }
 
+func (e *EventService) GetAllByUser(id uint) ([]domain.Event, error) {
+	data, err := e.repository.GetAllByUser(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
 func (e *EventService) GetByID(id uint) (*domain.Event, error) {
 	data, err := e.repository.GetByID(id)
 	if err != nil {
@@ -50,7 +59,7 @@ func (e *EventService) Update(id uint, req domain.Event) (*domain.Event, error) 
 
 	data, err := e.repository.Update(event, req)
 	if err != nil {
-		return nil, err
+		return data, err
 	}
 
 	return data, nil
