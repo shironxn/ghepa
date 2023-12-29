@@ -18,19 +18,15 @@ func NewUserService(repository port.UserRepository) port.UserService {
 	}
 }
 
-func (u *UserService) Create(req domain.User) (*domain.User, error) {
-	if _, err := u.repository.GetByEmail(req.Email); err == nil {
-		return nil, errors.New("email has already been used")
-	}
-
-	hashedPassword, err := u.util.HashPassword(req.Password)
+func (u *UserService) Create(entity domain.User) (*domain.User, error) {
+	hashedPassword, err := u.util.HashPassword(entity.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Password = string(hashedPassword)
+	entity.Password = string(hashedPassword)
 
-	data, err := u.repository.Create(req)
+	data, err := u.repository.Create(entity)
 	if err != nil {
 		return nil, err
 	}
@@ -38,13 +34,13 @@ func (u *UserService) Create(req domain.User) (*domain.User, error) {
 	return data, nil
 }
 
-func (u *UserService) Login(req domain.UserAuth) (*domain.User, error) {
-	data, err := u.repository.GetByEmail(req.Email)
+func (u *UserService) Login(entity domain.UserAuth) (*domain.User, error) {
+	data, err := u.repository.GetByEmail(entity.Email)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := u.util.ComparePassword(req.Password, []byte(data.Password)); err != nil {
+	if err := u.util.ComparePassword(entity.Password, []byte(data.Password)); err != nil {
 		return nil, err
 	}
 
@@ -69,20 +65,24 @@ func (u *UserService) GetByID(id uint) (*domain.User, error) {
 	return data, nil
 }
 
-func (u *UserService) Update(id uint, req domain.User) (*domain.User, error) {
-	hashedPassword, err := u.util.HashPassword(req.Password)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Password = string(hashedPassword)
-
+func (u *UserService) Update(entity domain.User, id uint) (*domain.User, error) {
 	user, err := u.repository.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	data, err := u.repository.Update(user, req)
+	if user.Name != entity.Name {
+		return nil, errors.New("user does not have permission to perform this action")
+	}
+
+	hashedPassword, err := u.util.HashPassword(entity.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	entity.Password = string(hashedPassword)
+
+	data, err := u.repository.Update(user, entity)
 	if err != nil {
 		return nil, err
 	}
@@ -90,10 +90,14 @@ func (u *UserService) Update(id uint, req domain.User) (*domain.User, error) {
 	return data, nil
 }
 
-func (u *UserService) Delete(id uint) error {
-	user, err := u.repository.GetByID(id)
+func (u *UserService) Delete(entity domain.User) error {
+	user, err := u.repository.GetByID(entity.ID)
 	if err != nil {
 		return err
+	}
+
+	if user.Name != entity.Name {
+		return errors.New("user does not have permission to perform this action")
 	}
 
 	err = u.repository.Delete(user)

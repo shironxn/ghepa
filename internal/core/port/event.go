@@ -6,21 +6,21 @@ import (
 )
 
 type EventRepository interface {
-	Create(req domain.Event) (*domain.Event, error)
+	Create(entity domain.Event) (*domain.Event, error)
 	GetAll() ([]domain.Event, error)
 	GetAllByUser(id uint) ([]domain.Event, error)
 	GetByID(id uint) (*domain.Event, error)
-	Update(event *domain.Event, req domain.Event) (*domain.Event, error)
-	Delete(event *domain.Event) error
+	Update(entity *domain.Event, entityUpdate domain.Event) (*domain.Event, error)
+	Delete(entity *domain.Event) error
 }
 
 type EventService interface {
-	Create(req domain.Event) (*domain.Event, error)
+	Create(entity domain.Event) (*domain.Event, error)
 	GetAll() ([]domain.Event, error)
 	GetAllByUser(id uint) ([]domain.Event, error)
 	GetByID(id uint) (*domain.Event, error)
-	Update(id uint, req domain.Event) (*domain.Event, error)
-	Delete(id uint) error
+	Update(entity domain.Event, id uint) (*domain.Event, error)
+	Delete(entity domain.Event) error
 }
 
 type EventHandler interface {

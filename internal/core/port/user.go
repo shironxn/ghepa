@@ -6,21 +6,21 @@ import (
 )
 
 type UserRepository interface {
-	Create(req domain.User) (*domain.User, error)
+	Create(entity domain.User) (*domain.User, error)
 	GetAll() ([]domain.User, error)
 	GetByID(id uint) (*domain.User, error)
 	GetByEmail(email string) (*domain.User, error)
-	Update(user *domain.User, req domain.User) (*domain.User, error)
-	Delete(user *domain.User) error
+	Update(entity *domain.User, entityUpdate domain.User) (*domain.User, error)
+	Delete(entity *domain.User) error
 }
 
 type UserService interface {
-	Create(req domain.User) (*domain.User, error)
-	Login(req domain.UserAuth) (*domain.User, error)
+	Create(entity domain.User) (*domain.User, error)
+	Login(entity domain.UserAuth) (*domain.User, error)
 	GetAll() ([]domain.User, error)
 	GetByID(id uint) (*domain.User, error)
-	Update(id uint, req domain.User) (*domain.User, error)
-	Delete(id uint) error
+	Update(entity domain.User, id uint) (*domain.User, error)
+	Delete(entity domain.User) error
 }
 
 type UserHandler interface {

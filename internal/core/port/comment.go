@@ -6,12 +6,12 @@ import (
 )
 
 type CommentRepository interface {
-	Create(req domain.Event) (*domain.Comment, error)
+	Create(entity domain.Event) (*domain.Comment, error)
 	GetAll() ([]domain.Comment, error)
 }
 
 type CommentService interface {
-	Create(req domain.Event) (*domain.Comment, error)
+	Create(entity domain.Event) (*domain.Comment, error)
 	GetAll() ([]domain.Comment, error)
 }
 

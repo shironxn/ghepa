@@ -29,33 +29,33 @@ func NewEventHandler(service port.EventService) port.EventHandler {
 }
 
 func (e *EventHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var req domain.Event
+	var entity domain.Event
 
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		e.response.Error(w, http.StatusBadRequest, "failed to read request body", err)
+		e.response.Error(w, http.StatusBadRequest, "failed to read request body", err.Error())
 		return
 	}
 
-	err = json.Unmarshal(reqBody, &req)
+	err = json.Unmarshal(reqBody, &entity)
 	if err != nil {
-		e.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err)
+		e.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err.Error())
 		return
 	}
 
 	claims := r.Context().Value("claims").(*domain.Claims)
-	req.User = response.User{
+	entity.User = response.User{
 		ID:   claims.ID,
 		Name: claims.Name,
 	}
 
-	errValidate := util.Validate(e.validate, req)
+	errValidate := util.Validate(e.validate, entity)
 	if errValidate != nil {
 		e.response.Error(w, http.StatusBadRequest, "validation failed", errValidate)
 		return
 	}
 
-	result, err := e.service.Create(req)
+	result, err := e.service.Create(entity)
 	if err != nil {
 		e.response.Error(w, http.StatusBadRequest, "failed create event", err.Error())
 		return
@@ -165,7 +165,7 @@ func (e *EventHandler) GetAllByUser(w http.ResponseWriter, r *http.Request) {
 
 		eventList = append(eventList, response.EventInfo{
 			Event: response.Event{
-				ID:          event.User.ID,
+				ID:          event.ID,
 				Title:       event.Title,
 				Description: event.Description,
 				Owner: response.User{
@@ -183,7 +183,7 @@ func (e *EventHandler) GetAllByUser(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	e.response.Success(w, http.StatusOK, "successfully retrivied user", eventList)
+	e.response.Success(w, http.StatusOK, "successfully retrivied event", eventList)
 }
 
 func (e *EventHandler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -239,7 +239,7 @@ func (e *EventHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
-	var req domain.Event
+	var entity domain.Event
 
 	vars := mux.Vars(r)
 	params := vars["id"]
@@ -252,29 +252,29 @@ func (e *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		e.response.Error(w, http.StatusBadRequest, "failed to read request body", err)
+		e.response.Error(w, http.StatusBadRequest, "failed to read request body", err.Error())
 		return
 	}
 
-	err = json.Unmarshal(reqBody, &req)
+	err = json.Unmarshal(reqBody, &entity)
 	if err != nil {
-		e.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err)
+		e.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err.Error())
 		return
 	}
 
 	claims := r.Context().Value("claims").(*domain.Claims)
-	req.User = response.User{
+	entity.User = response.User{
 		ID:   claims.ID,
 		Name: claims.Name,
 	}
 
-	errValidate := util.Validate(e.validate, req)
+	errValidate := util.Validate(e.validate, entity)
 	if errValidate != nil {
 		e.response.Error(w, http.StatusBadRequest, "validation failed", errValidate)
 		return
 	}
 
-	result, err := e.service.Update(uint(id), req)
+	result, err := e.service.Update(entity, uint(id))
 	if err != nil {
 		e.response.Error(w, http.StatusBadRequest, "failed update event", err.Error())
 		return
@@ -317,6 +317,8 @@ func (e *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *EventHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	var entity domain.Event
+
 	vars := mux.Vars(r)
 	params := vars["id"]
 
@@ -326,18 +328,19 @@ func (e *EventHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req domain.Event
 	claims := r.Context().Value("claims").(*domain.Claims)
-	req.User = response.User{
+	entity.User = response.User{
 		ID:   claims.ID,
 		Name: claims.Name,
 	}
 
-	err = e.service.Delete(uint(id))
+	entity.ID = uint(id)
+
+	err = e.service.Delete(entity)
 	if err != nil {
 		e.response.Error(w, http.StatusBadGateway, "failed deleted event", err.Error())
 		return
 	}
 
-	e.response.Success(w, http.StatusOK, "successfully deleted event", nil)
+	e.response.Success(w, http.StatusNoContent, "successfully deleted event", nil)
 }

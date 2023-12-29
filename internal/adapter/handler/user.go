@@ -30,7 +30,7 @@ func NewUserHandler(service port.UserService) port.UserHandler {
 }
 
 func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var req domain.UserAuth
+	var entity domain.UserAuth
 
 	c, err := r.Cookie("token")
 	if err == nil && c != nil {
@@ -40,23 +40,23 @@ func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		u.response.Error(w, http.StatusBadRequest, "failed to read request body", err)
+		u.response.Error(w, http.StatusBadRequest, "failed to read request body", err.Error())
 		return
 	}
 
-	err = json.Unmarshal(reqBody, &req)
+	err = json.Unmarshal(reqBody, &entity)
 	if err != nil {
-		u.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err)
+		u.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err.Error())
 		return
 	}
 
-	errValidate := util.Validate(u.validate, req)
+	errValidate := util.Validate(u.validate, entity)
 	if errValidate != nil {
 		u.response.Error(w, http.StatusBadRequest, "validation failed", errValidate)
 		return
 	}
 
-	result, err := u.service.Login(req)
+	result, err := u.service.Login(entity)
 	if err != nil {
 		u.response.Error(w, http.StatusUnauthorized, "cannot login user", err.Error())
 		return
@@ -83,7 +83,7 @@ func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var req domain.User
+	var entity domain.User
 
 	c, err := r.Cookie("token")
 	if err == nil && c != nil {
@@ -93,23 +93,23 @@ func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		uh.response.Error(w, http.StatusBadRequest, "failed to read request body", err)
+		uh.response.Error(w, http.StatusBadRequest, "failed to read request body", err.Error())
 		return
 	}
 
-	err = json.Unmarshal(reqBody, &req)
+	err = json.Unmarshal(reqBody, &entity)
 	if err != nil {
-		uh.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err)
+		uh.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err.Error())
 		return
 	}
 
-	errValidate := util.Validate(uh.validate, req)
+	errValidate := util.Validate(uh.validate, entity)
 	if errValidate != nil {
 		uh.response.Error(w, http.StatusBadRequest, "validation failed", errValidate)
 		return
 	}
 
-	result, err := uh.service.Create(req)
+	result, err := uh.service.Create(entity)
 	if err != nil {
 		uh.response.Error(w, http.StatusBadRequest, "cannot register user", err.Error())
 		return
@@ -180,7 +180,7 @@ func (uh *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
-	var req domain.User
+	var entity domain.User
 
 	vars := mux.Vars(r)
 	params := vars["id"]
@@ -193,23 +193,27 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		uh.response.Error(w, http.StatusBadRequest, "failed to read request body", err)
+		uh.response.Error(w, http.StatusBadRequest, "failed to read request body", err.Error())
 		return
 	}
 
-	err = json.Unmarshal(reqBody, &req)
+	err = json.Unmarshal(reqBody, &entity)
 	if err != nil {
-		uh.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err)
+		uh.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err.Error())
 		return
 	}
 
-	errValidate := util.Validate(uh.validate, req)
+	claims := r.Context().Value("claims").(*domain.Claims)
+	entity.ID = uint(id)
+	entity.Name = claims.Name
+
+	errValidate := util.Validate(uh.validate, entity)
 	if errValidate != nil {
 		uh.response.Error(w, http.StatusBadRequest, "validation failed", errValidate)
 		return
 	}
 
-	result, err := uh.service.Update(uint(id), req)
+	result, err := uh.service.Update(entity, uint(id))
 	if err != nil {
 		uh.response.Error(w, http.StatusInternalServerError, "failed to update user", err.Error())
 		return
@@ -228,6 +232,7 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	var entity domain.User
 	vars := mux.Vars(r)
 	params := vars["id"]
 
@@ -237,7 +242,11 @@ func (uh *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = uh.service.Delete(uint(id))
+	claims := r.Context().Value("claims").(*domain.Claims)
+	entity.ID = uint(id)
+	entity.Name = claims.Name
+
+	err = uh.service.Delete(entity)
 	if err != nil {
 		uh.response.Error(w, http.StatusInternalServerError, "failed to delete user", err.Error())
 		return

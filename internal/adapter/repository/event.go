@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"errors"
 	"event-planning-app/internal/core/domain"
 	"event-planning-app/internal/core/port"
 
@@ -18,60 +17,51 @@ func NewEventRepository(db *gorm.DB) port.EventRepository {
 	}
 }
 
-func (e *EventRepository) Create(event domain.Event) (*domain.Event, error) {
-	err := e.db.Create(&event).Error
-	return &event, err
+func (e *EventRepository) Create(entity domain.Event) (*domain.Event, error) {
+	err := e.db.Create(&entity).Error
+	return &entity, err
 }
 
 func (e *EventRepository) GetAll() ([]domain.Event, error) {
-	var events []domain.Event
+	var entity []domain.Event
 	if err := e.db.Preload("User").
 		Preload("Comments").Preload("Comments.User").
 		Preload("Participant.User").
-		Find(&events).Error; err != nil {
+		Find(&entity).Error; err != nil {
 		return nil, err
 	}
-	return events, nil
+	return entity, nil
 }
 
 func (e *EventRepository) GetAllByUser(userID uint) ([]domain.Event, error) {
-	var events []domain.Event
+	var entity []domain.Event
 	if err := e.db.Preload("User").
 		Preload("Comments").Preload("Comments.User").
 		Preload("Participant.User").
 		Where("user_id = ?", userID).
-		Find(&events).Error; err != nil {
+		Find(&entity).Error; err != nil {
 		return nil, err
 	}
-	return events, nil
+	return entity, nil
 }
 
 func (e *EventRepository) GetByID(eventID uint) (*domain.Event, error) {
-	var event domain.Event
+	var entity domain.Event
 	if err := e.db.Preload("User").
 		Preload("Comments").Preload("Comments.User").
 		Preload("Participant.User").
-		First(&event, eventID).Error; err != nil {
+		First(&entity, eventID).Error; err != nil {
 		return nil, err
 	}
-	return &event, nil
+	return &entity, nil
 }
 
-func (e *EventRepository) Update(event *domain.Event, updateData domain.Event) (*domain.Event, error) {
-	result := e.db.Model(event).Where("user_id = ?", updateData.User.ID).Updates(updateData)
-
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		return nil, errors.New("no rows affected by update")
-	}
-
-	return event, nil
+func (e *EventRepository) Update(entity *domain.Event, entityUpdate domain.Event) (*domain.Event, error) {
+	err := e.db.Model(&entity).Updates(entityUpdate).Error
+	return entity, err
 }
 
-func (e *EventRepository) Delete(event *domain.Event) error {
-	err := e.db.Delete(event).Error
+func (e *EventRepository) Delete(entity *domain.Event) error {
+	err := e.db.Delete(&entity).Error
 	return err
 }

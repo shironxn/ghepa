@@ -1,9 +1,11 @@
 package repository
 
 import (
+	"errors"
 	"event-planning-app/internal/core/domain"
 	"event-planning-app/internal/core/port"
 
+	"github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -17,35 +19,39 @@ func NewUserRepository(db *gorm.DB) port.UserRepository {
 	}
 }
 
-func (u *UserRepository) Create(req domain.User) (*domain.User, error) {
-	err := u.db.Create(&req).Error
-	return &req, err
+func (u *UserRepository) Create(entity domain.User) (*domain.User, error) {
+	err := u.db.Create(&entity).Error
+	var mysqlErr *mysql.MySQLError
+	if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+		return nil, errors.New(mysqlErr.Message)
+	}
+	return &entity, err
 }
 
 func (u *UserRepository) GetAll() ([]domain.User, error) {
-	var users []domain.User
-	err := u.db.Find(&users).Error
-	return users, err
+	var entity []domain.User
+	err := u.db.Find(&entity).Error
+	return entity, err
 }
 
 func (u *UserRepository) GetByID(id uint) (*domain.User, error) {
-	var user domain.User
-	err := u.db.First(&user, id).Error
-	return &user, err
+	var entity domain.User
+	err := u.db.First(&entity, id).Error
+	return &entity, err
 }
 
 func (u *UserRepository) GetByEmail(email string) (*domain.User, error) {
-	var user domain.User
-	err := u.db.Where("email = ?", email).First(&user).Error
-	return &user, err
+	var entity domain.User
+	err := u.db.Where("email = ?", email).First(&entity).Error
+	return &entity, err
 }
 
-func (u *UserRepository) Update(user *domain.User, req domain.User) (*domain.User, error) {
-	err := u.db.Model(user).Updates(req).Error
-	return user, err
+func (u *UserRepository) Update(entity *domain.User, entityUpdate domain.User) (*domain.User, error) {
+	err := u.db.Model(&entity).Updates(entityUpdate).Error
+	return entity, err
 }
 
-func (u *UserRepository) Delete(user *domain.User) error {
-	err := u.db.Delete(&user).Error
+func (u *UserRepository) Delete(entity *domain.User) error {
+	err := u.db.Delete(&entity).Error
 	return err
 }
