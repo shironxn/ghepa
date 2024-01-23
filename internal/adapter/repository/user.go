@@ -5,6 +5,7 @@ import (
 	"event-planning-app/internal/core/domain"
 	"event-planning-app/internal/core/port"
 
+	"github.com/charmbracelet/log"
 	"github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
 )
@@ -48,6 +49,9 @@ func (u *UserRepository) GetByEmail(email string) (*domain.User, error) {
 
 func (u *UserRepository) Update(entity *domain.User, entityUpdate domain.User) (*domain.User, error) {
 	err := u.db.Model(&entity).Updates(entityUpdate).Error
+	log.Info(entity)
+	log.Info("TES")
+	log.Info(entityUpdate)
 	return entity, err
 }
 

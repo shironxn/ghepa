@@ -62,23 +62,17 @@ func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := u.jwt.GenerateToken(w, *result)
+	_, err = u.jwt.GenerateToken(w, *result)
 	if err != nil {
 		u.response.Error(w, http.StatusInternalServerError, "failed to generate token", err.Error())
 		return
 	}
 
-	u.response.Success(w, http.StatusOK, "login successful", response.UserInfo{
-		User: response.User{
-			ID:   result.ID,
-			Name: result.Name,
-		},
-		Details: response.UserDetails{
-			Token:     token.Token,
-			Expired:   token.Expired,
-			CreatedAt: result.CreatedAt,
-			UpdatedAt: result.UpdatedAt,
-		},
+	u.response.Success(w, http.StatusOK, "login successful", response.User{
+		ID:        result.ID,
+		Name:      result.Name,
+		CreatedAt: result.CreatedAt,
+		UpdatedAt: result.UpdatedAt,
 	})
 }
 
@@ -115,15 +109,11 @@ func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uh.response.Success(w, http.StatusOK, "successful register user", response.UserInfo{
-		User: response.User{
-			ID:   result.ID,
-			Name: result.Email,
-		},
-		Details: response.UserDetails{
-			CreatedAt: result.CreatedAt,
-			UpdatedAt: result.UpdatedAt,
-		},
+	uh.response.Success(w, http.StatusOK, "successful register user", response.User{
+		ID:        result.ID,
+		Name:      result.Name,
+		CreatedAt: result.CreatedAt,
+		UpdatedAt: result.UpdatedAt,
 	})
 }
 
@@ -134,17 +124,13 @@ func (uh *UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var userList []response.UserInfo
+	var userList []response.User
 	for _, user := range result {
-		userList = append(userList, response.UserInfo{
-			User: response.User{
-				ID:   user.ID,
-				Name: user.Name,
-			},
-			Details: response.UserDetails{
-				CreatedAt: user.CreatedAt,
-				UpdatedAt: user.UpdatedAt,
-			},
+		userList = append(userList, response.User{
+			ID:        user.ID,
+			Name:      user.Name,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
 		})
 	}
 
@@ -167,15 +153,11 @@ func (uh *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uh.response.Success(w, http.StatusOK, "successfully retrieved user by id", response.UserInfo{
-		User: response.User{
-			ID:   result.ID,
-			Name: result.Email,
-		},
-		Details: response.UserDetails{
-			CreatedAt: result.CreatedAt,
-			UpdatedAt: result.UpdatedAt,
-		},
+	uh.response.Success(w, http.StatusOK, "successfully retrieved user by id", response.User{
+		ID:        result.ID,
+		Name:      result.Name,
+		CreatedAt: result.CreatedAt,
+		UpdatedAt: result.UpdatedAt,
 	})
 }
 
@@ -204,8 +186,7 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	claims := r.Context().Value("claims").(*domain.Claims)
-	entity.ID = uint(id)
-	entity.Name = claims.Name
+	entity.ID = claims.ID
 
 	errValidate := util.Validate(uh.validate, entity)
 	if errValidate != nil {
@@ -219,15 +200,11 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uh.response.Success(w, http.StatusOK, "successfully update user data", response.UserInfo{
-		User: response.User{
-			ID:   uint(id),
-			Name: result.Name,
-		},
-		Details: response.UserDetails{
-			CreatedAt: result.CreatedAt,
-			UpdatedAt: result.UpdatedAt,
-		},
+	uh.response.Success(w, http.StatusOK, "successfully update user data", response.User{
+		ID:        uint(id),
+		Name:      result.Name,
+		CreatedAt: result.CreatedAt,
+		UpdatedAt: result.UpdatedAt,
 	})
 }
 

@@ -26,7 +26,7 @@ func (e *EventRepository) GetAll() ([]domain.Event, error) {
 	var entity []domain.Event
 	if err := e.db.Preload("User").
 		Preload("Comments").Preload("Comments.User").
-		Preload("Participant.User").
+		Preload("Participants.User").
 		Find(&entity).Error; err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (e *EventRepository) GetAllByUser(userID uint) ([]domain.Event, error) {
 	var entity []domain.Event
 	if err := e.db.Preload("User").
 		Preload("Comments").Preload("Comments.User").
-		Preload("Participant.User").
+		Preload("Participants.User").
 		Where("user_id = ?", userID).
 		Find(&entity).Error; err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (e *EventRepository) GetByID(eventID uint) (*domain.Event, error) {
 	var entity domain.Event
 	if err := e.db.Preload("User").
 		Preload("Comments").Preload("Comments.User").
-		Preload("Participant.User").
+		Preload("Participants.User").
 		First(&entity, eventID).Error; err != nil {
 		return nil, err
 	}

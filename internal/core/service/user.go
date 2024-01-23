@@ -5,6 +5,8 @@ import (
 	"event-planning-app/internal/core/domain"
 	"event-planning-app/internal/core/port"
 	"event-planning-app/internal/util"
+
+	"github.com/charmbracelet/log"
 )
 
 type UserService struct {
@@ -71,7 +73,9 @@ func (u *UserService) Update(entity domain.User, id uint) (*domain.User, error) 
 		return nil, err
 	}
 
-	if user.Name != entity.Name {
+	log.Info(entity.ID)
+
+	if user.ID != entity.ID {
 		return nil, errors.New("user does not have permission to perform this action")
 	}
 

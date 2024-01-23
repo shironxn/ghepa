@@ -62,29 +62,25 @@ func (e *EventHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var participantList []response.ParticipantList
-	for _, participant := range result.Participant {
+	for _, participant := range result.Participants {
 		participantList = append(participantList, response.ParticipantList{
 			Name:  participant.User.Name,
 			Email: participant.User.Email,
 		})
 	}
 
-	e.response.Success(w, http.StatusOK, "success create event", response.EventInfo{
-		Event: response.Event{
-			ID:          result.ID,
-			Title:       result.Title,
-			Description: result.Description,
-			Owner: response.User{
-				ID:   result.User.ID,
-				Name: result.User.Name,
-			},
-			Participant: participantList,
+	e.response.Success(w, http.StatusOK, "success create event", response.Event{
+		ID:          result.ID,
+		Title:       result.Title,
+		Description: result.Description,
+		Owner: response.User{
+			ID:   result.User.ID,
+			Name: result.User.Name,
 		},
-		EventDetails: response.EventDetails{
-			UpdatedAt: result.UpdatedAt,
-			CreatedAt: result.CreatedAt,
-			EndDate:   result.EndDate,
-		},
+		EndDate:      result.EndDate,
+		Participants: participantList,
+		UpdatedAt:    result.UpdatedAt,
+		CreatedAt:    result.CreatedAt,
 	})
 }
 
@@ -95,7 +91,7 @@ func (e *EventHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var eventList []response.EventInfo
+	var eventList []response.Event
 	for _, event := range result {
 		var commentList []response.CommentList
 		for _, comment := range event.Comments {
@@ -106,30 +102,25 @@ func (e *EventHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var participantList []response.ParticipantList
-		for _, participant := range event.Participant {
+		for _, participant := range event.Participants {
 			participantList = append(participantList, response.ParticipantList{
 				Name:  participant.User.Name,
 				Email: participant.User.Email,
 			})
 		}
 
-		eventList = append(eventList, response.EventInfo{
-			Event: response.Event{
-				ID:          event.ID,
-				Title:       event.Title,
-				Description: event.Description,
-				Owner: response.User{
-					ID:   event.User.ID,
-					Name: event.User.Name,
-				},
-				Comments:    commentList,
-				Participant: participantList,
+		eventList = append(eventList, response.Event{
+			ID:          event.ID,
+			Title:       event.Title,
+			Description: event.Description,
+			Owner: response.User{
+				ID:   event.User.ID,
+				Name: event.User.Name,
 			},
-			EventDetails: response.EventDetails{
-				UpdatedAt: event.UpdatedAt,
-				CreatedAt: event.CreatedAt,
-				EndDate:   event.EndDate,
-			},
+			EndDate:      event.EndDate,
+			Participants: participantList,
+			UpdatedAt:    event.UpdatedAt,
+			CreatedAt:    event.CreatedAt,
 		})
 	}
 
@@ -145,7 +136,7 @@ func (e *EventHandler) GetAllByUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var eventList []response.EventInfo
+	var eventList []response.Event
 	for _, event := range result {
 		var commentList []response.CommentList
 		for _, comment := range event.Comments {
@@ -156,30 +147,26 @@ func (e *EventHandler) GetAllByUser(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var participantList []response.ParticipantList
-		for _, participant := range event.Participant {
+		for _, participant := range event.Participants {
 			participantList = append(participantList, response.ParticipantList{
 				Name:  participant.User.Name,
 				Email: participant.User.Email,
 			})
 		}
 
-		eventList = append(eventList, response.EventInfo{
-			Event: response.Event{
-				ID:          event.ID,
-				Title:       event.Title,
-				Description: event.Description,
-				Owner: response.User{
-					ID:   event.User.ID,
-					Name: event.User.Name,
-				},
-				Comments:    commentList,
-				Participant: participantList,
+		eventList = append(eventList, response.Event{
+			ID:          event.ID,
+			Title:       event.Title,
+			Description: event.Description,
+			Owner: response.User{
+				ID:   event.User.ID,
+				Name: event.User.Name,
 			},
-			EventDetails: response.EventDetails{
-				CreatedAt: event.CreatedAt,
-				UpdatedAt: event.UpdatedAt,
-				EndDate:   event.EndDate,
-			},
+			EndDate:      event.EndDate,
+			Participants: participantList,
+			UpdatedAt:    event.UpdatedAt,
+			CreatedAt:    event.CreatedAt,
+			Comments:     commentList,
 		})
 	}
 
@@ -211,30 +198,26 @@ func (e *EventHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var participantList []response.ParticipantList
-	for _, participant := range result.Participant {
+	for _, participant := range result.Participants {
 		participantList = append(participantList, response.ParticipantList{
 			Name:  participant.User.Name,
 			Email: participant.User.Email,
 		})
 	}
 
-	e.response.Success(w, http.StatusOK, "successfully retrived event id", response.EventInfo{
-		Event: response.Event{
-			ID:          result.ID,
-			Title:       result.Title,
-			Description: result.Description,
-			Owner: response.User{
-				ID:   result.User.ID,
-				Name: result.User.Name,
-			},
-			Comments:    commentList,
-			Participant: participantList,
+	e.response.Success(w, http.StatusOK, "successfully retrived event id", response.Event{
+		ID:          result.ID,
+		Title:       result.Title,
+		Description: result.Description,
+		Owner: response.User{
+			ID:   result.User.ID,
+			Name: result.User.Name,
 		},
-		EventDetails: response.EventDetails{
-			UpdatedAt: result.UpdatedAt,
-			CreatedAt: result.CreatedAt,
-			EndDate:   result.EndDate,
-		},
+		EndDate:      result.EndDate,
+		Participants: participantList,
+		UpdatedAt:    result.UpdatedAt,
+		CreatedAt:    result.CreatedAt,
+		Comments:     commentList,
 	})
 }
 
@@ -289,30 +272,26 @@ func (e *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var participantList []response.ParticipantList
-	for _, participant := range result.Participant {
+	for _, participant := range result.Participants {
 		participantList = append(participantList, response.ParticipantList{
 			Name:  participant.User.Name,
 			Email: participant.User.Email,
 		})
 	}
 
-	e.response.Success(w, http.StatusOK, "successfully update event", response.EventInfo{
-		Event: response.Event{
-			ID:          result.ID,
-			Title:       result.Title,
-			Description: result.Description,
-			Owner: response.User{
-				ID:   result.User.ID,
-				Name: result.User.Name,
-			},
-			Comments:    commentList,
-			Participant: participantList,
+	e.response.Success(w, http.StatusOK, "successfully update event", response.Event{
+		ID:          result.ID,
+		Title:       result.Title,
+		Description: result.Description,
+		Owner: response.User{
+			ID:   result.User.ID,
+			Name: result.User.Name,
 		},
-		EventDetails: response.EventDetails{
-			UpdatedAt: result.UpdatedAt,
-			CreatedAt: result.CreatedAt,
-			EndDate:   result.EndDate,
-		},
+		EndDate:      result.EndDate,
+		Participants: participantList,
+		UpdatedAt:    result.UpdatedAt,
+		CreatedAt:    result.CreatedAt,
+		Comments:     commentList,
 	})
 }
 
