@@ -20,7 +20,7 @@ func NewUserService(repository port.UserRepository) port.UserService {
 	}
 }
 
-func (u *UserService) Create(entity domain.User) (*domain.User, error) {
+func (u *UserService) Create(entity domain.RegisterRequest) (*domain.User, error) {
 	hashedPassword, err := u.util.HashPassword(entity.Password)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (u *UserService) Create(entity domain.User) (*domain.User, error) {
 	return data, nil
 }
 
-func (u *UserService) Login(entity domain.UserAuth) (*domain.User, error) {
+func (u *UserService) Login(entity domain.LoginRequest) (*domain.User, error) {
 	data, err := u.repository.GetByEmail(entity.Email)
 	if err != nil {
 		return nil, err

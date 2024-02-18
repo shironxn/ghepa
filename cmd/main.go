@@ -19,22 +19,21 @@ func main() {
 	log.Info("Database migration successful")
 
 	userRepository := repository.NewUserRepository(db)
-	log.Info("User repository created")
-
 	userService := service.NewUserService(userRepository)
-	log.Info("User service created")
-
 	userHandler := handler.NewUserHandler(userService)
-	log.Info("User handler created")
 
 	eventRepository := repository.NewEventRepository(db)
 	eventService := service.NewEventService(eventRepository)
 	eventHandler := handler.NewEventHandler(eventService)
 
+	commentRepository := repository.NewCommentRepository(db)
+	commentService := service.NewCommentService(commentRepository)
+	commentHandler := handler.NewCommentHandler(commentService)
+
 	jwtManager := &util.JWTManager{}
 	authMiddleware := middleware.NewAuthMiddleware(*jwtManager)
 
-	route := route.NewRoute(userHandler, eventHandler, *authMiddleware, config.GetConfig())
+	route := route.NewRoute(userHandler, eventHandler, commentHandler, *authMiddleware, config.GetConfig())
 
 	route.Initialize()
 }

@@ -295,6 +295,31 @@ func (e *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (e *EventHandler) JoinEvent(w http.ResponseWriter, r *http.Request) {
+	var entity domain.Participant
+
+	vars := mux.Vars(r)
+	params := vars["id"]
+
+	id, err := strconv.Atoi(params)
+	if err != nil {
+		e.response.Error(w, http.StatusBadRequest, "invalid user id", err.Error())
+		return
+	}
+
+	claims := r.Context().Value("claims").(*domain.Claims)
+	entity.UserID = claims.ID
+	entity.EventID = uint(id)
+
+	result, err := e.service.JoinEvent(entity)
+	if err != nil {
+		e.response.Error(w, http.StatusBadRequest, "failed to join event", err.Error())
+		return
+	}
+
+	e.response.Success(w, http.StatusOK, "successfully join event", result)
+}
+
 func (e *EventHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	var entity domain.Event
 

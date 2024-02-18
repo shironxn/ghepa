@@ -30,7 +30,7 @@ func NewUserHandler(service port.UserService) port.UserHandler {
 }
 
 func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var entity domain.UserAuth
+	var entity domain.LoginRequest
 
 	c, err := r.Cookie("token")
 	if err == nil && c != nil {
@@ -77,7 +77,7 @@ func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var entity domain.User
+	var entity domain.RegisterRequest
 
 	c, err := r.Cookie("token")
 	if err == nil && c != nil {

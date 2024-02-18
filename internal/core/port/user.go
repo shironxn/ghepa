@@ -15,8 +15,8 @@ type UserRepository interface {
 }
 
 type UserService interface {
-	Create(entity domain.User) (*domain.User, error)
-	Login(entity domain.UserAuth) (*domain.User, error)
+	Create(entity domain.RegisterRequest) (*domain.User, error)
+	Login(entity domain.LoginRequest) (*domain.User, error)
 	GetAll() ([]domain.User, error)
 	GetByID(id uint) (*domain.User, error)
 	Update(entity domain.User, id uint) (*domain.User, error)

@@ -16,8 +16,8 @@ func NewEventService(repository port.EventRepository) port.EventService {
 	}
 }
 
-func (e *EventService) Create(req domain.Event) (*domain.Event, error) {
-	data, err := e.repository.Create(req)
+func (e *EventService) Create(entity domain.Event) (*domain.Event, error) {
+	data, err := e.repository.Create(entity)
 	return data, err
 }
 
@@ -36,17 +36,17 @@ func (e *EventService) GetByID(id uint) (*domain.Event, error) {
 	return data, err
 }
 
-func (e *EventService) Update(req domain.Event, id uint) (*domain.Event, error) {
+func (e *EventService) Update(entity domain.Event, id uint) (*domain.Event, error) {
 	event, err := e.repository.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	if event.User.ID != req.User.ID {
+	if event.User.ID != entity.User.ID {
 		return nil, errors.New("user does not have permission to perform this action")
 	}
 
-	data, err := e.repository.Update(event, req)
+	data, err := e.repository.Update(event, entity)
 	if err != nil {
 		return data, err
 	}
@@ -54,13 +54,18 @@ func (e *EventService) Update(req domain.Event, id uint) (*domain.Event, error) 
 	return data, nil
 }
 
-func (e *EventService) Delete(req domain.Event) error {
-	event, err := e.repository.GetByID(req.ID)
+func (e *EventService) JoinEvent(entity domain.Participant) (*domain.Participant, error) {
+	event, err := e.repository.JoinEvent(entity)
+	return event, err
+}
+
+func (e *EventService) Delete(entity domain.Event) error {
+	event, err := e.repository.GetByID(entity.ID)
 	if err != nil {
 		return err
 	}
 
-	if event.User.ID != req.User.ID {
+	if event.User.ID != entity.User.ID {
 		return errors.New("user does not have permission to perform this action")
 	}
 

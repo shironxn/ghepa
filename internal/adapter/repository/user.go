@@ -21,6 +21,7 @@ func NewUserRepository(db *gorm.DB) port.UserRepository {
 }
 
 func (u *UserRepository) Create(entity domain.User) (*domain.User, error) {
+
 	err := u.db.Create(&entity).Error
 	var mysqlErr *mysql.MySQLError
 	if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {

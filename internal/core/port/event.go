@@ -12,6 +12,7 @@ type EventRepository interface {
 	GetByID(id uint) (*domain.Event, error)
 	Update(entity *domain.Event, entityUpdate domain.Event) (*domain.Event, error)
 	Delete(entity *domain.Event) error
+	JoinEvent(entity domain.Participant) (*domain.Participant, error)
 }
 
 type EventService interface {
@@ -21,6 +22,7 @@ type EventService interface {
 	GetByID(id uint) (*domain.Event, error)
 	Update(entity domain.Event, id uint) (*domain.Event, error)
 	Delete(entity domain.Event) error
+	JoinEvent(entity domain.Participant) (*domain.Participant, error)
 }
 
 type EventHandler interface {
@@ -30,4 +32,5 @@ type EventHandler interface {
 	GetByID(w http.ResponseWriter, r *http.Request)
 	Update(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
+	JoinEvent(w http.ResponseWriter, r *http.Request)
 }

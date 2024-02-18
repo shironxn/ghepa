@@ -4,6 +4,7 @@ import (
 	"event-planning-app/internal/core/domain"
 	"event-planning-app/internal/core/port"
 
+	"github.com/charmbracelet/log"
 	"gorm.io/gorm"
 )
 
@@ -59,6 +60,22 @@ func (e *EventRepository) GetByID(eventID uint) (*domain.Event, error) {
 func (e *EventRepository) Update(entity *domain.Event, entityUpdate domain.Event) (*domain.Event, error) {
 	err := e.db.Model(&entity).Updates(entityUpdate).Error
 	return entity, err
+}
+
+func (e *EventRepository) JoinEvent(entity domain.Participant) (*domain.Participant, error) {
+	err := e.db.Create(&entity).Error
+	if err != nil {
+		log.Info("tes1")
+		return nil, err
+	}
+
+	err = e.db.Model(&entity.Event).Association("Participants").Append(&entity)
+	if err != nil {
+		log.Info("tes2")
+		return nil, err
+	}
+
+	return &entity, nil
 }
 
 func (e *EventRepository) Delete(entity *domain.Event) error {
