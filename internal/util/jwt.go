@@ -4,7 +4,6 @@ import (
 	"errors"
 	"event-planning-app/config"
 	"event-planning-app/internal/core/domain"
-	"event-planning-app/internal/response"
 	"net/http"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 type JWTManager struct {
 }
 
-func (j *JWTManager) GenerateToken(w http.ResponseWriter, user domain.User) (*response.UserDetails, error) {
+func (j *JWTManager) GenerateToken(w http.ResponseWriter, user domain.User) (*domain.UserDetails, error) {
 	conf := config.GetConfig()
 
 	expirationTime := jwt.NewNumericDate(time.Now().Add(10 * time.Hour))
@@ -47,7 +46,7 @@ func (j *JWTManager) GenerateToken(w http.ResponseWriter, user domain.User) (*re
 
 	http.SetCookie(w, cookie)
 
-	details := response.UserDetails{
+	details := domain.UserDetails{
 		Token:   tokenString,
 		Expired: expireTime.String(),
 	}

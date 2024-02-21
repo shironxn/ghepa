@@ -5,7 +5,6 @@ import (
 	"event-planning-app/internal/core/domain"
 	"event-planning-app/internal/core/port"
 
-	"github.com/charmbracelet/log"
 	"github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
 )
@@ -20,7 +19,12 @@ func NewUserRepository(db *gorm.DB) port.UserRepository {
 	}
 }
 
-func (u *UserRepository) Create(entity domain.User) (*domain.User, error) {
+func (u *UserRepository) Create(req domain.UserRequest) (*domain.User, error) {
+	entity := domain.User{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: req.Password,
+	}
 
 	err := u.db.Create(&entity).Error
 	var mysqlErr *mysql.MySQLError
@@ -48,15 +52,12 @@ func (u *UserRepository) GetByEmail(email string) (*domain.User, error) {
 	return &entity, err
 }
 
-func (u *UserRepository) Update(entity *domain.User, entityUpdate domain.User) (*domain.User, error) {
-	err := u.db.Model(&entity).Updates(entityUpdate).Error
-	log.Info(entity)
-	log.Info("TES")
-	log.Info(entityUpdate)
+func (u *UserRepository) Update(entity *domain.User, req domain.UserRequest) (*domain.User, error) {
+	err := u.db.Model(&entity).Updates(req).Error
 	return entity, err
 }
 
 func (u *UserRepository) Delete(entity *domain.User) error {
-	err := u.db.Delete(&entity).Error
+	err := u.db.Where("id = ?", entity.ID).Delete(&entity).Error
 	return err
 }

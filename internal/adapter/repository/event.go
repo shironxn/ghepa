@@ -18,7 +18,13 @@ func NewEventRepository(db *gorm.DB) port.EventRepository {
 	}
 }
 
-func (e *EventRepository) Create(entity domain.Event) (*domain.Event, error) {
+func (e *EventRepository) Create(req domain.EventRequest) (*domain.Event, error) {
+	entity := domain.Event{
+		Title:       req.Title,
+		Description: req.Description,
+		EndDate:     req.EndDate,
+		User:        req.User,
+	}
 	err := e.db.Create(&entity).Error
 	return &entity, err
 }
@@ -57,15 +63,30 @@ func (e *EventRepository) GetByID(eventID uint) (*domain.Event, error) {
 	return &entity, nil
 }
 
-func (e *EventRepository) Update(entity *domain.Event, entityUpdate domain.Event) (*domain.Event, error) {
-	err := e.db.Model(&entity).Updates(entityUpdate).Error
-	return entity, err
+func (e *EventRepository) Update(entity *domain.Event, req domain.EventRequest) (*domain.Event, error) {
+	entityUpdate := domain.Event{
+		Title:       req.Title,
+		Description: req.Description,
+		EndDate:     req.EndDate,
+		User:        req.User,
+	}
+	err := e.db.Model(entity).Updates(entityUpdate).Error
+	return &entityUpdate, err
 }
 
-func (e *EventRepository) JoinEvent(entity domain.Participant) (*domain.Participant, error) {
+func (e *EventRepository) Delete(entity *domain.Event) error {
+	err := e.db.Delete(&entity).Error
+	return err
+}
+
+func (e *EventRepository) JoinEvent(req domain.ParticipantRequest) (*domain.Participant, error) {
+	entity := domain.Participant{
+		UserID:  req.UserID,
+		EventID: req.EventID,
+	}
+
 	err := e.db.Create(&entity).Error
 	if err != nil {
-		log.Info("tes1")
 		return nil, err
 	}
 
@@ -76,9 +97,4 @@ func (e *EventRepository) JoinEvent(entity domain.Participant) (*domain.Particip
 	}
 
 	return &entity, nil
-}
-
-func (e *EventRepository) Delete(entity *domain.Event) error {
-	err := e.db.Delete(&entity).Error
-	return err
 }

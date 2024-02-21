@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"event-planning-app/internal/core/domain"
 	"event-planning-app/internal/core/port"
-	"event-planning-app/internal/response"
 	"event-planning-app/internal/util"
 	"io"
 	"net/http"
@@ -52,7 +51,7 @@ func (c *CommentHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.response.Success(w, http.StatusOK, "successfully to create comment", response.Comment{
+	c.response.Success(w, http.StatusOK, "successfully to create comment", domain.CommentResponse{
 		UserName:  result.User.Name,
 		EventName: result.Event.Title,
 		Comment:   result.Comment,

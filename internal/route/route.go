@@ -44,13 +44,11 @@ func (s *Route) Initialize() {
 	api := r.PathPrefix("/api/v1/").Subrouter()
 	api.Use(s.authMiddleware.JWTVerify)
 
-	// user route
 	api.HandleFunc("/user", s.user.GetAll).Methods("GET")
 	api.HandleFunc("/user/{id}", s.user.GetByID).Methods("GET")
 	api.HandleFunc("/user/{id}", s.user.Update).Methods("PUT")
 	api.HandleFunc("/user/{id}", s.user.Delete).Methods("DELETE")
 
-	// event route
 	api.HandleFunc("/event", s.event.Create).Methods("POST")
 	api.HandleFunc("/event", s.event.GetAllByUser).Methods("GET")
 	api.HandleFunc("/event/{id}", s.event.GetByID).Methods("GET")
@@ -58,7 +56,6 @@ func (s *Route) Initialize() {
 	api.HandleFunc("/event/{id}", s.event.Delete).Methods("DELETE")
 	api.HandleFunc("/event/{id}/join", s.event.JoinEvent).Methods("POST")
 
-	// comment route
 	api.HandleFunc("/comment", s.comment.Create).Methods("POST")
 	api.HandleFunc("/comment", s.comment.GetAll).Methods("GET")
 

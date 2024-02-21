@@ -1,7 +1,7 @@
 package util
 
 import (
-	"event-planning-app/internal/response"
+	"event-planning-app/internal/core/domain"
 	"fmt"
 
 	"github.com/go-playground/locales/en"
@@ -10,7 +10,7 @@ import (
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 )
 
-func Validate(validate *validator.Validate, data interface{}) []response.ValidationError {
+func Validate(validate *validator.Validate, data interface{}) []domain.ValidationError {
 	err := validate.Struct(data)
 
 	enLocale := en.New()
@@ -19,11 +19,11 @@ func Validate(validate *validator.Validate, data interface{}) []response.Validat
 	en_translations.RegisterDefaultTranslations(validate, trans)
 
 	if err != nil {
-		errors := make([]response.ValidationError, 0)
+		errors := make([]domain.ValidationError, 0)
 
 		for _, validationErr := range err.(validator.ValidationErrors) {
 			translatedErr := fmt.Errorf(validationErr.Translate(trans))
-			errors = append(errors, response.ValidationError{
+			errors = append(errors, domain.ValidationError{
 				Field:  validationErr.StructField(),
 				Errors: translatedErr.Error(),
 			})

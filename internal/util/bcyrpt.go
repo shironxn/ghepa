@@ -5,6 +5,7 @@ import "golang.org/x/crypto/bcrypt"
 type Bcrypt struct {
 }
 
+
 func (b *Bcrypt) HashPassword(password string) ([]byte, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return hashedPassword, err

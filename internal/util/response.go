@@ -2,7 +2,7 @@ package util
 
 import (
 	"encoding/json"
-	"event-planning-app/internal/response"
+	"event-planning-app/internal/core/domain"
 	"net/http"
 )
 
@@ -10,7 +10,7 @@ type Response struct {
 }
 
 func (r *Response) Success(w http.ResponseWriter, status int, message string, data interface{}) {
-	res := response.Success{
+	res := domain.SuccessResponse{
 		Message: message,
 		Data:    data,
 	}
@@ -27,7 +27,7 @@ func (r *Response) Success(w http.ResponseWriter, status int, message string, da
 }
 
 func (r *Response) Error(w http.ResponseWriter, status int, message string, err interface{}) {
-	res := response.Error{
+	res := domain.ErrorResponse{
 		Message: message,
 		Errors:  err,
 	}

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"event-planning-app/internal/core/domain"
 	"event-planning-app/internal/core/port"
-	"event-planning-app/internal/response"
+
 	"event-planning-app/internal/util"
 	"io"
 	"net/http"
@@ -30,7 +30,7 @@ func NewUserHandler(service port.UserService) port.UserHandler {
 }
 
 func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var entity domain.LoginRequest
+	var req domain.LoginRequest
 
 	c, err := r.Cookie("token")
 	if err == nil && c != nil {
@@ -44,19 +44,19 @@ func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.Unmarshal(reqBody, &entity)
+	err = json.Unmarshal(reqBody, &req)
 	if err != nil {
 		u.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err.Error())
 		return
 	}
 
-	errValidate := util.Validate(u.validate, entity)
+	errValidate := util.Validate(u.validate, req)
 	if errValidate != nil {
 		u.response.Error(w, http.StatusBadRequest, "validation failed", errValidate)
 		return
 	}
 
-	result, err := u.service.Login(entity)
+	result, err := u.service.Login(req)
 	if err != nil {
 		u.response.Error(w, http.StatusUnauthorized, "cannot login user", err.Error())
 		return
@@ -68,7 +68,7 @@ func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u.response.Success(w, http.StatusOK, "login successful", response.User{
+	u.response.Success(w, http.StatusOK, "login successful", domain.UserResponse{
 		ID:        result.ID,
 		Name:      result.Name,
 		CreatedAt: result.CreatedAt,
@@ -77,7 +77,7 @@ func (u *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var entity domain.RegisterRequest
+	var req domain.UserRequest
 
 	c, err := r.Cookie("token")
 	if err == nil && c != nil {
@@ -91,25 +91,25 @@ func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.Unmarshal(reqBody, &entity)
+	err = json.Unmarshal(reqBody, &req)
 	if err != nil {
 		uh.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err.Error())
 		return
 	}
 
-	errValidate := util.Validate(uh.validate, entity)
+	errValidate := util.Validate(uh.validate, req)
 	if errValidate != nil {
 		uh.response.Error(w, http.StatusBadRequest, "validation failed", errValidate)
 		return
 	}
 
-	result, err := uh.service.Create(entity)
+	result, err := uh.service.Create(req)
 	if err != nil {
 		uh.response.Error(w, http.StatusBadRequest, "cannot register user", err.Error())
 		return
 	}
 
-	uh.response.Success(w, http.StatusOK, "successful register user", response.User{
+	uh.response.Success(w, http.StatusOK, "successful register user", domain.UserResponse{
 		ID:        result.ID,
 		Name:      result.Name,
 		CreatedAt: result.CreatedAt,
@@ -124,9 +124,9 @@ func (uh *UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var userList []response.User
+	var userList []domain.UserResponse
 	for _, user := range result {
-		userList = append(userList, response.User{
+		userList = append(userList, domain.UserResponse{
 			ID:        user.ID,
 			Name:      user.Name,
 			CreatedAt: user.CreatedAt,
@@ -138,6 +138,8 @@ func (uh *UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+	var req domain.UserRequest
+
 	vars := mux.Vars(r)
 	params := vars["id"]
 
@@ -147,13 +149,15 @@ func (uh *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := uh.service.GetByID(uint(id))
+	req.ID = uint(id)
+
+	result, err := uh.service.GetByID(req)
 	if err != nil {
 		uh.response.Error(w, http.StatusInternalServerError, "failed to get user by id", err.Error())
 		return
 	}
 
-	uh.response.Success(w, http.StatusOK, "successfully retrieved user by id", response.User{
+	uh.response.Success(w, http.StatusOK, "successfully retrieved user by id", domain.UserResponse{
 		ID:        result.ID,
 		Name:      result.Name,
 		CreatedAt: result.CreatedAt,
@@ -162,7 +166,7 @@ func (uh *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
-	var entity domain.User
+	var req domain.UserRequest
 
 	vars := mux.Vars(r)
 	params := vars["id"]
@@ -179,28 +183,28 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.Unmarshal(reqBody, &entity)
+	err = json.Unmarshal(reqBody, &req)
 	if err != nil {
 		uh.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err.Error())
 		return
 	}
 
 	claims := r.Context().Value("claims").(*domain.Claims)
-	entity.ID = claims.ID
+	req.ID = uint(id)
 
-	errValidate := util.Validate(uh.validate, entity)
+	errValidate := util.Validate(uh.validate, req)
 	if errValidate != nil {
 		uh.response.Error(w, http.StatusBadRequest, "validation failed", errValidate)
 		return
 	}
 
-	result, err := uh.service.Update(entity, uint(id))
+	result, err := uh.service.Update(req, *claims)
 	if err != nil {
 		uh.response.Error(w, http.StatusInternalServerError, "failed to update user", err.Error())
 		return
 	}
 
-	uh.response.Success(w, http.StatusOK, "successfully update user data", response.User{
+	uh.response.Success(w, http.StatusOK, "successfully update user data", domain.UserResponse{
 		ID:        uint(id),
 		Name:      result.Name,
 		CreatedAt: result.CreatedAt,
@@ -209,7 +213,8 @@ func (uh *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	var entity domain.User
+	var req domain.UserRequest
+
 	vars := mux.Vars(r)
 	params := vars["id"]
 
@@ -220,10 +225,9 @@ func (uh *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	claims := r.Context().Value("claims").(*domain.Claims)
-	entity.ID = uint(id)
-	entity.Name = claims.Name
+	req.ID = uint(id)
 
-	err = uh.service.Delete(entity)
+	err = uh.service.Delete(req, *claims)
 	if err != nil {
 		uh.response.Error(w, http.StatusInternalServerError, "failed to delete user", err.Error())
 		return

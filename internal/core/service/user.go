@@ -5,8 +5,6 @@ import (
 	"event-planning-app/internal/core/domain"
 	"event-planning-app/internal/core/port"
 	"event-planning-app/internal/util"
-
-	"github.com/charmbracelet/log"
 )
 
 type UserService struct {
@@ -20,15 +18,15 @@ func NewUserService(repository port.UserRepository) port.UserService {
 	}
 }
 
-func (u *UserService) Create(entity domain.RegisterRequest) (*domain.User, error) {
-	hashedPassword, err := u.util.HashPassword(entity.Password)
+func (u *UserService) Create(req domain.UserRequest) (*domain.User, error) {
+	hashedPassword, err := u.util.HashPassword(req.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	entity.Password = string(hashedPassword)
+	req.Password = string(hashedPassword)
 
-	data, err := u.repository.Create(entity)
+	data, err := u.repository.Create(req)
 	if err != nil {
 		return nil, err
 	}
@@ -36,13 +34,13 @@ func (u *UserService) Create(entity domain.RegisterRequest) (*domain.User, error
 	return data, nil
 }
 
-func (u *UserService) Login(entity domain.LoginRequest) (*domain.User, error) {
-	data, err := u.repository.GetByEmail(entity.Email)
+func (u *UserService) Login(req domain.LoginRequest) (*domain.User, error) {
+	data, err := u.repository.GetByEmail(req.Email)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := u.util.ComparePassword(entity.Password, []byte(data.Password)); err != nil {
+	if err := u.util.ComparePassword(req.Password, []byte(data.Password)); err != nil {
 		return nil, err
 	}
 
@@ -58,8 +56,8 @@ func (u *UserService) GetAll() ([]domain.User, error) {
 	return data, nil
 }
 
-func (u *UserService) GetByID(id uint) (*domain.User, error) {
-	data, err := u.repository.GetByID(id)
+func (u *UserService) GetByID(req domain.UserRequest) (*domain.User, error) {
+	data, err := u.repository.GetByID(req.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -67,26 +65,24 @@ func (u *UserService) GetByID(id uint) (*domain.User, error) {
 	return data, nil
 }
 
-func (u *UserService) Update(entity domain.User, id uint) (*domain.User, error) {
-	user, err := u.repository.GetByID(id)
+func (u *UserService) Update(req domain.UserRequest, claims domain.Claims) (*domain.User, error) {
+	user, err := u.repository.GetByID(req.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Info(entity.ID)
-
-	if user.ID != entity.ID {
+	if user.ID != claims.ID {
 		return nil, errors.New("user does not have permission to perform this action")
 	}
 
-	hashedPassword, err := u.util.HashPassword(entity.Password)
+	hashedPassword, err := u.util.HashPassword(req.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	entity.Password = string(hashedPassword)
+	req.Password = string(hashedPassword)
 
-	data, err := u.repository.Update(user, entity)
+	data, err := u.repository.Update(user, req)
 	if err != nil {
 		return nil, err
 	}
@@ -94,13 +90,13 @@ func (u *UserService) Update(entity domain.User, id uint) (*domain.User, error) 
 	return data, nil
 }
 
-func (u *UserService) Delete(entity domain.User) error {
-	user, err := u.repository.GetByID(entity.ID)
+func (u *UserService) Delete(req domain.UserRequest, claims domain.Claims) error {
+	user, err := u.repository.GetByID(req.ID)
 	if err != nil {
 		return err
 	}
 
-	if user.Name != entity.Name {
+	if user.ID != claims.ID {
 		return errors.New("user does not have permission to perform this action")
 	}
 
