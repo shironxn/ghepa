@@ -1,8 +1,8 @@
 package service
 
 import (
-	"event-planning-app/internal/core/domain"
-	"event-planning-app/internal/core/port"
+	"ghepa/internal/core/domain"
+	"ghepa/internal/core/port"
 )
 
 type CommentService struct {
@@ -15,8 +15,8 @@ func NewCommentService(repository port.CommentRepository) port.CommentService {
 	}
 }
 
-func (c *CommentService) Create(entity domain.Comment) (*domain.Comment, error) {
-	data, err := c.repository.Create(entity)
+func (c *CommentService) Create(req domain.CommentRequest) (*domain.Comment, error) {
+	data, err := c.repository.Create(req)
 	return data, err
 }
 

@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"event-planning-app/internal/util"
+	"ghepa/internal/util"
 	"net/http"
 )
 
@@ -28,7 +28,7 @@ func (j *AuthMiddleware) JWTVerify(next http.Handler) http.Handler {
 		tokenString := c.Value
 		claims, errToken := j.jwt.ValidateToken(tokenString)
 		if errToken != nil {
-			j.response.Error(w, http.StatusUnauthorized, "invalid Token", errToken.Error())
+			j.response.Error(w, http.StatusUnauthorized, "invalid token", errToken.Error())
 			return
 		}
 

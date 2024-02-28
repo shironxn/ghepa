@@ -1,7 +1,7 @@
 package port
 
 import (
-	"event-planning-app/internal/core/domain"
+	"ghepa/internal/core/domain"
 	"net/http"
 )
 

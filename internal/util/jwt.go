@@ -2,8 +2,8 @@ package util
 
 import (
 	"errors"
-	"event-planning-app/config"
-	"event-planning-app/internal/core/domain"
+	"ghepa/config"
+	"ghepa/internal/core/domain"
 	"net/http"
 	"time"
 

@@ -2,9 +2,9 @@ package service
 
 import (
 	"errors"
-	"event-planning-app/internal/core/domain"
-	"event-planning-app/internal/core/port"
-	"event-planning-app/internal/util"
+	"ghepa/internal/core/domain"
+	"ghepa/internal/core/port"
+	"ghepa/internal/util"
 )
 
 type UserService struct {

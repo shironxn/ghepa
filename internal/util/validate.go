@@ -1,8 +1,8 @@
 package util
 
 import (
-	"event-planning-app/internal/core/domain"
 	"fmt"
+	"ghepa/internal/core/domain"
 
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"

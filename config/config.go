@@ -57,7 +57,7 @@ func GetConfig() *App {
 }
 
 func initConfig() *App {
-	conf := App{}
+	config := App{}
 
 	err := godotenv.Load(".env")
 
@@ -65,20 +65,20 @@ func initConfig() *App {
 		log.Error(err)
 	}
 
-	conf.Server.Host = os.Getenv("APP_HOST")
-	conf.Server.Port = os.Getenv("APP_PORT")
+	config.Server.Host = os.Getenv("APP_HOST")
+	config.Server.Port = os.Getenv("APP_PORT")
 
-	conf.Database.Host = os.Getenv("DB_HOST")
-	conf.Database.Port = os.Getenv("DB_PORT")
-	conf.Database.Name = os.Getenv("DB_NAME")
-	conf.Database.User = os.Getenv("DB_USER")
-	conf.Database.Pass = os.Getenv("DB_PASS")
+	config.Database.Host = os.Getenv("DB_HOST")
+	config.Database.Port = os.Getenv("DB_PORT")
+	config.Database.Name = os.Getenv("DB_NAME")
+	config.Database.User = os.Getenv("DB_USER")
+	config.Database.Pass = os.Getenv("DB_PASS")
 
-	conf.JWTSecret = os.Getenv("JWT_SECRET")
+	config.JWTSecret = os.Getenv("JWT_SECRET")
 
-	conf.Admin.Name = os.Getenv("ADMIN_NAME")
-	conf.Admin.Email = os.Getenv("ADMIN_EMAIL")
-	conf.Admin.Password = os.Getenv("ADMIN_PASSWORD")
+	config.Admin.Name = os.Getenv("ADMIN_NAME")
+	config.Admin.Email = os.Getenv("ADMIN_EMAIL")
+	config.Admin.Password = os.Getenv("ADMIN_PASSWORD")
 
-	return &conf
+	return &config
 }

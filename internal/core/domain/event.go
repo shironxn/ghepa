@@ -8,30 +8,31 @@ import (
 
 type Event struct {
 	gorm.Model
-	Title        string        `json:"title"`
+	Name         string        `json:"name"`
 	Description  string        `json:"description"`
 	EndDate      string        `json:"end_date"`
 	UserID       uint          `json:"user_id"`
 	User         UserResponse  `json:"user" gorm:"foreignKey:UserID;reference:ID"`
-	Comments     []Comment     `json:"comments" gorm:"many2many:comments_event"`
-	Participants []Participant `json:"participants" gorm:"many2many:participants_event"`
+	Comments     []Comment     `json:"comments" gorm:"many2many:comment_events"`
+	Participants []Participant `json:"participants" gorm:"many2many:participant_events"`
 }
 
 type EventRequest struct {
 	User        UserResponse `json:"user"`
-	Title       string       `json:"title" form:"title" validate:"required"`
+	Name        string       `json:"Name" form:"Name" validate:"required"`
 	Description string       `json:"description" form:"description" validate:"required"`
 	EndDate     string       `json:"end_date" form:"end_date" validate:"required,datetime=2006-01-02"`
 }
 
 type EventResponse struct {
 	ID           uint              `json:"id"`
-	Title        string            `json:"title"`
+	Name         string            `json:"name"`
 	Description  string            `json:"description"`
-	Owner        UserResponse      `json:"owner"`
+	UserID       uint              `json:"user_id"`
+	UserName     string            `json:"user_name"`
 	EndDate      string            `json:"end_date"`
 	CreatedAt    time.Time         `json:"created_at"`
 	UpdatedAt    time.Time         `json:"updated_at"`
-	Comments     []CommentList     `json:"comments"`
-	Participants []ParticipantList `json:"participants"`
+	Comments     []CommentList     `json:"comments,omitempty"`
+	Participants []ParticipantList `json:"participants,omitempty"`
 }

@@ -2,8 +2,8 @@ package service
 
 import (
 	"errors"
-	"event-planning-app/internal/core/domain"
-	"event-planning-app/internal/core/port"
+	"ghepa/internal/core/domain"
+	"ghepa/internal/core/port"
 )
 
 type EventService struct {

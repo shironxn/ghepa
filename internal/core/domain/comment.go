@@ -15,6 +15,11 @@ type Comment struct {
 	Event   Event  `json:"event" gorm:"foreignKey:EventID;reference:ID"`
 }
 
+type CommentList struct {
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
+}
+
 type CommentRequest struct {
 	UserID  uint   `json:"user_id" form:"user_id" validate:"required"`
 	EventID uint   `json:"event_id" form:"event_id" validate:"required"`
@@ -22,14 +27,12 @@ type CommentRequest struct {
 }
 
 type CommentResponse struct {
-	UserName  string    `json:"user_name"`
-	EventName string    `json:"event_name"`
+	ID        uint      `json:"id"`
 	Comment   string    `json:"comment"`
+	UserID    uint      `json:"user_id"`
+	EventID   uint      `json:"event_id"`
+	EventName string    `json:"event_name"`
+	UserName  string    `json:"user_name"`
 	CreateAt  time.Time `json:"create_at"`
 	UpdateAt  time.Time `json:"update_at"`
-}
-
-type CommentList struct {
-	Name    string `json:"name"`
-	Comment string `json:"comment"`
 }

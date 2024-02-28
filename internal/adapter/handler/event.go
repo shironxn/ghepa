@@ -2,9 +2,9 @@ package handler
 
 import (
 	"encoding/json"
-	"event-planning-app/internal/core/domain"
-	"event-planning-app/internal/core/port"
-	"event-planning-app/internal/util"
+	"ghepa/internal/core/domain"
+	"ghepa/internal/core/port"
+	"ghepa/internal/util"
 	"io"
 	"net/http"
 	"strconv"
@@ -68,13 +68,11 @@ func (e *EventHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	e.response.Success(w, http.StatusOK, "success create event", domain.EventResponse{
-		ID:          result.ID,
-		Title:       result.Title,
-		Description: result.Description,
-		Owner: domain.UserResponse{
-			ID:   result.User.ID,
-			Name: result.User.Name,
-		},
+		ID:           result.ID,
+		Name:         result.Name,
+		Description:  result.Description,
+		UserID:       result.User.ID,
+		UserName:     result.User.Name,
 		EndDate:      result.EndDate,
 		Participants: participantList,
 		UpdatedAt:    result.UpdatedAt,
@@ -108,13 +106,11 @@ func (e *EventHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		}
 
 		eventList = append(eventList, domain.EventResponse{
-			ID:          event.ID,
-			Title:       event.Title,
-			Description: event.Description,
-			Owner: domain.UserResponse{
-				ID:   event.User.ID,
-				Name: event.User.Name,
-			},
+			ID:           event.ID,
+			Name:         event.Name,
+			Description:  event.Description,
+			UserID:       event.User.ID,
+			UserName:     event.User.Name,
 			EndDate:      event.EndDate,
 			Comments:     commentList,
 			Participants: participantList,
@@ -157,13 +153,11 @@ func (e *EventHandler) GetAllByUser(w http.ResponseWriter, r *http.Request) {
 		}
 
 		eventList = append(eventList, domain.EventResponse{
-			ID:          event.ID,
-			Title:       event.Title,
-			Description: event.Description,
-			Owner: domain.UserResponse{
-				ID:   event.User.ID,
-				Name: event.User.Name,
-			},
+			ID:           event.ID,
+			Name:         event.Name,
+			Description:  event.Description,
+			UserID:       event.User.ID,
+			UserName:     event.User.Name,
 			EndDate:      event.EndDate,
 			Participants: participantList,
 			UpdatedAt:    event.UpdatedAt,
@@ -212,13 +206,11 @@ func (e *EventHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	e.response.Success(w, http.StatusOK, "successfully retrived event id", domain.EventResponse{
-		ID:          result.ID,
-		Title:       result.Title,
-		Description: result.Description,
-		Owner: domain.UserResponse{
-			ID:   result.User.ID,
-			Name: result.User.Name,
-		},
+		ID:           result.ID,
+		Name:         result.Name,
+		Description:  result.Description,
+		UserID:       result.User.ID,
+		UserName:     result.User.Name,
 		EndDate:      result.EndDate,
 		Participants: participantList,
 		UpdatedAt:    result.UpdatedAt,
@@ -266,14 +258,6 @@ func (e *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var commentList []domain.CommentList
-	for _, comment := range result.Comments {
-		commentList = append(commentList, domain.CommentList{
-			Name:    comment.User.Name,
-			Comment: comment.Comment,
-		})
-	}
-
 	var participantList []domain.ParticipantList
 	for _, participant := range result.Participants {
 		participantList = append(participantList, domain.ParticipantList{
@@ -283,18 +267,15 @@ func (e *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	e.response.Success(w, http.StatusOK, "successfully update event", domain.EventResponse{
-		ID:          result.ID,
-		Title:       result.Title,
-		Description: result.Description,
-		Owner: domain.UserResponse{
-			ID:   result.User.ID,
-			Name: result.User.Name,
-		},
+		ID:           result.ID,
+		Name:         result.Name,
+		Description:  result.Description,
+		UserID:       result.User.ID,
+		UserName:     result.User.Name,
 		EndDate:      result.EndDate,
 		Participants: participantList,
 		UpdatedAt:    result.UpdatedAt,
 		CreatedAt:    result.CreatedAt,
-		Comments:     commentList,
 	})
 }
 
@@ -320,7 +301,7 @@ func (e *EventHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	e.response.Success(w, http.StatusNoContent, "successfully deleted event", nil)
+	e.response.Success(w, http.StatusOK, "successfully deleted event", nil)
 }
 
 func (e *EventHandler) JoinEvent(w http.ResponseWriter, r *http.Request) {
@@ -345,5 +326,13 @@ func (e *EventHandler) JoinEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	e.response.Success(w, http.StatusOK, "successfully join event", result)
+	e.response.Success(w, http.StatusOK, "successfully join event", domain.ParticipantResponse{
+		ID:        result.ID,
+		EventID:   result.EventID,
+		UserID:    result.UserID,
+		EventName: result.Event.Name,
+		UserName:  result.User.Name,
+		CreateAt:  result.CreatedAt,
+		UpdateAt:  result.UpdatedAt,
+	})
 }

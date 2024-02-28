@@ -1,17 +1,17 @@
 package port
 
 import (
-	"event-planning-app/internal/core/domain"
+	"ghepa/internal/core/domain"
 	"net/http"
 )
 
 type CommentRepository interface {
-	Create(entity domain.Comment) (*domain.Comment, error)
+	Create(req domain.CommentRequest) (*domain.Comment, error)
 	GetAll() ([]domain.Comment, error)
 }
 
 type CommentService interface {
-	Create(entity domain.Comment) (*domain.Comment, error)
+	Create(req domain.CommentRequest) (*domain.Comment, error)
 	GetAll() ([]domain.Comment, error)
 }
 

@@ -2,13 +2,15 @@ package handler
 
 import (
 	"encoding/json"
-	"event-planning-app/internal/core/domain"
-	"event-planning-app/internal/core/port"
-	"event-planning-app/internal/util"
+	"ghepa/internal/core/domain"
+	"ghepa/internal/core/port"
+	"ghepa/internal/util"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 )
 
 type CommentHandler struct {
@@ -25,7 +27,16 @@ func NewCommentHandler(service port.CommentService) port.CommentHandler {
 }
 
 func (c *CommentHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var entity domain.Comment
+	var entity domain.CommentRequest
+
+	vars := mux.Vars(r)
+	params := vars["id"]
+
+	id, err := strconv.Atoi(params)
+	if err != nil {
+		c.response.Error(w, http.StatusBadRequest, "invalid user id", err.Error())
+		return
+	}
 
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -38,6 +49,10 @@ func (c *CommentHandler) Create(w http.ResponseWriter, r *http.Request) {
 		c.response.Error(w, http.StatusBadRequest, "failed to unmarshal request body", err.Error())
 		return
 	}
+
+	claims := r.Context().Value("claims").(*domain.Claims)
+	entity.UserID = claims.ID
+	entity.EventID = uint(id)
 
 	errValidate := util.Validate(c.validate, entity)
 	if errValidate != nil {
@@ -52,9 +67,11 @@ func (c *CommentHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c.response.Success(w, http.StatusOK, "successfully to create comment", domain.CommentResponse{
-		UserName:  result.User.Name,
-		EventName: result.Event.Title,
+		ID:        result.ID,
 		Comment:   result.Comment,
+		EventName: result.Event.Name,
+		UserID:    result.User.ID,
+		UserName:  result.User.Name,
 		CreateAt:  result.CreatedAt,
 		UpdateAt:  result.UpdatedAt,
 	})
@@ -67,5 +84,19 @@ func (c *CommentHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.response.Success(w, http.StatusOK, "successfully get all comments", result)
+	var commentList []domain.CommentResponse
+
+	for _, comment := range result {
+		commentList = append(commentList, domain.CommentResponse{
+			ID:        comment.ID,
+			Comment:   comment.Comment,
+			EventName: comment.Event.Name,
+			UserID:    comment.User.ID,
+			UserName:  comment.User.Name,
+			CreateAt:  comment.CreatedAt,
+			UpdateAt:  comment.UpdatedAt,
+		})
+	}
+
+	c.response.Success(w, http.StatusOK, "successfully get all comments", commentList)
 }

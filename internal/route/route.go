@@ -1,10 +1,10 @@
 package route
 
 import (
-	"event-planning-app/config"
-	"event-planning-app/internal/core/port"
-	"event-planning-app/internal/middleware"
-	"event-planning-app/internal/util"
+	"ghepa/config"
+	"ghepa/internal/core/port"
+	"ghepa/internal/middleware"
+	"ghepa/internal/util"
 	"net/http"
 
 	"github.com/charmbracelet/log"
@@ -34,7 +34,7 @@ func (s *Route) Initialize() {
 	r := mux.NewRouter().StrictSlash(true)
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		s.response.Success(w, http.StatusOK, "welcome to event planning api!", nil)
+		s.response.Success(w, http.StatusOK, "welcome to event planning api", nil)
 	})
 
 	auth := r.PathPrefix("/api/v1/auth/").Subrouter()
@@ -56,7 +56,7 @@ func (s *Route) Initialize() {
 	api.HandleFunc("/event/{id}", s.event.Delete).Methods("DELETE")
 	api.HandleFunc("/event/{id}/join", s.event.JoinEvent).Methods("POST")
 
-	api.HandleFunc("/comment", s.comment.Create).Methods("POST")
+	api.HandleFunc("/comment/{id}", s.comment.Create).Methods("POST")
 	api.HandleFunc("/comment", s.comment.GetAll).Methods("GET")
 
 	server := http.Server{

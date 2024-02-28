@@ -1,22 +1,19 @@
 package main
 
 import (
-	"event-planning-app/config"
-	"event-planning-app/internal/adapter/handler"
-	"event-planning-app/internal/adapter/repository"
-	"event-planning-app/internal/core/domain"
-	"event-planning-app/internal/core/service"
-	"event-planning-app/internal/middleware"
-	"event-planning-app/internal/route"
-	"event-planning-app/internal/util"
-
-	"github.com/charmbracelet/log"
+	"ghepa/config"
+	"ghepa/internal/adapter/handler"
+	"ghepa/internal/adapter/repository"
+	"ghepa/internal/core/domain"
+	"ghepa/internal/core/service"
+	"ghepa/internal/middleware"
+	"ghepa/internal/route"
+	"ghepa/internal/util"
 )
 
 func main() {
 	db := config.GetConnection()
 	db.AutoMigrate(&domain.User{}, &domain.Event{}, &domain.Comment{})
-	log.Info("Database migration successful")
 
 	userRepository := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepository)
@@ -34,6 +31,5 @@ func main() {
 	authMiddleware := middleware.NewAuthMiddleware(*jwtManager)
 
 	route := route.NewRoute(userHandler, eventHandler, commentHandler, *authMiddleware, config.GetConfig())
-
 	route.Initialize()
 }
