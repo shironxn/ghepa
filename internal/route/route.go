@@ -50,7 +50,7 @@ func (s *Route) Initialize() {
 	api.HandleFunc("/user/{id}", s.user.Delete).Methods("DELETE")
 
 	api.HandleFunc("/event", s.event.Create).Methods("POST")
-	api.HandleFunc("/event", s.event.GetAllByUser).Methods("GET")
+	api.HandleFunc("/event", s.event.GetAll).Methods("GET")
 	api.HandleFunc("/event/{id}", s.event.GetByID).Methods("GET")
 	api.HandleFunc("/event/{id}", s.event.Update).Methods("PUT")
 	api.HandleFunc("/event/{id}", s.event.Delete).Methods("DELETE")

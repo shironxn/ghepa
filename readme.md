@@ -84,7 +84,16 @@ GHEPA (Golang Hexagonal Event Planning App) is an event planning application bui
     ```
 
 ## 1.2 Usage With Docker
-    not done yet
+
+1. Install Docker Compose by running the following command (for Linux):
+    ```bash
+    sudo apt install docker-compose -y
+    ```
+
+2. After installing Docker Compose, navigate to the root directory of the project and run the following command to start the application in detached mode:
+    ```bash
+    docker-compose up -d
+    ```
 
 ## API Reference
 
@@ -121,5 +130,7 @@ GHEPA (Golang Hexagonal Event Planning App) is an event planning application bui
 | :------- | :---------------------- | :--------------------------- |
 | `POST`   | `/api/v1/comment/{id}`  | Create a comment for an event. |
 | `GET`    | `/api/v1/comment`       | Get all comments.            |
+
+##
 
 [![forthebadge](https://forthebadge.com/images/featured/featured-built-with-love.svg)](https://forthebadge.com)

@@ -38,7 +38,13 @@ var app *App
 func GetConnection() *gorm.DB {
 	conf := GetConfig()
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", conf.Database.User, conf.Database.Pass, conf.Database.Host, conf.Database.Port, conf.Database.Name)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		conf.Database.User,
+		conf.Database.Pass,
+		conf.Database.Host,
+		conf.Database.Port,
+		conf.Database.Name,
+	)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {

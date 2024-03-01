@@ -7,6 +7,9 @@ COPY . .
 RUN go mod tidy
 RUN go build -o bin/main ./cmd
 
-EXPOSE 8080
+ARG APP_PORT
+ENV APP_PORT=${APP_PORT}
+
+EXPOSE ${APP_PORT}
 
 CMD ["/app/bin/main"]
