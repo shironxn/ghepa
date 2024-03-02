@@ -44,7 +44,6 @@ func GetConnection() *gorm.DB {
 		conf.Database.Name,
 	)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
 	if err != nil {
 		log.Error(err)
 	}
@@ -64,7 +63,6 @@ func initConfig() *App {
 	config := App{}
 
 	err := godotenv.Load(".env")
-
 	if err != nil {
 		log.Error(err)
 	}
