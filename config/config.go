@@ -27,9 +27,7 @@ type App struct {
 	JWTSecret string
 
 	Admin struct {
-		Name     string
-		Email    string
-		Password string
+		Email string
 	}
 }
 
@@ -82,9 +80,7 @@ func initConfig() *App {
 
 	config.JWTSecret = os.Getenv("JWT_SECRET")
 
-	config.Admin.Name = os.Getenv("ADMIN_NAME")
 	config.Admin.Email = os.Getenv("ADMIN_EMAIL")
-	config.Admin.Password = os.Getenv("ADMIN_PASSWORD")
 
 	return &config
 }
